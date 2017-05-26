@@ -28,6 +28,12 @@ module.exports = {
             commonjs2: "underscore",
             amd: "underscore",
             root: "_"
+        },
+        "jquery": {
+            commonjs: "jquery",
+            commonjs2: "jquery",
+            amd: "jquery",
+            root: "$"
         }
     }
 };
