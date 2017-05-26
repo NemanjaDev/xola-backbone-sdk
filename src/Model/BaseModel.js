@@ -1,7 +1,7 @@
 import _ from "underscore";
 import Backbone from "backbone";
 
-export const Base = Backbone.Model.extend({
+export const BaseModel = Backbone.Model.extend({
     /**
      * Override the default `parse` method so that we can reuse nested models that have already been instantiated.
      * This helps reduce a lot of boilerplate code and also ensures that all listeners are kept intact.
