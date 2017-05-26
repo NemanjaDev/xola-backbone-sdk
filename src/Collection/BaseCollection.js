@@ -12,7 +12,7 @@ export const BaseCollection = Backbone.Collection.extend({
      * @returns {Object} Response model data (without paging information)
      */
     parse: function(resp) {
-        if (resp.hasOwnProperty("paging" && resp.hasOwnProperty("data")) {
+        if (resp.hasOwnProperty("paging") && resp.hasOwnProperty("data")) {
             return resp.data;
         }
 
