@@ -1,43 +1,46 @@
 import Backbone from 'backbone';
-import { Seller } from './Seller';
-import { Experience } from './experience';
-import { GiftOffer } from './gift_offer';
-import { UrlHelper } from '../helpers/url_helper';
+import {Base} from "./Base";
+import {Config} from "../Config";
+import {Seller} from './Seller';
+import {Experience} from './experience';
+import {GiftOffer} from './GiftOffer';
 
-export const ButtonItem = Backbone.Model.extend({
+export const ButtonItem = Base.extend({
 
-  defaults() {
-    return {
-      experience: new Experience(),
-      giftOffer: new GiftOffer()
-    };
-  },
+    defaults() {
+        return {
+            experience: new Experience(),
+            giftOffer: new GiftOffer()
+        };
+    },
 }, {
-  TYPE_EXPERIENCE: 'experience',
-  TYPE_GIFT_OFFER: 'gift_offer',
-  TYPE_GIFT: 'gift',
+    TYPE_EXPERIENCE: 'experience',
+    TYPE_GIFT_OFFER: 'gift_offer',
+    TYPE_GIFT: 'gift',
 });
 
 export const ButtonItemCollection = Backbone.Collection.extend({
-  model: ButtonItem,
+    model: ButtonItem,
 
-  comparator(buttonItem) {
-    return buttonItem.get('sequence');
-  },
+    comparator(buttonItem) {
+        return buttonItem.get('sequence');
+    },
 });
 
 export const Button = Backbone.Model.extend({
-  urlRoot: UrlHelper.xola('/api/buttons'),
+    urlRoot() {
+        return Config.BASE_URL + "/buttons"
+    },
 
-  defaults() {
-    return {
-      type: Button.TYPE_GIFT,
-      items: new ButtonItemCollection(),
-      seller: new Seller(),
-    };
-  },
+    defaults() {
+        return {
+            type: Button.TYPE_GIFT,
+            items: new ButtonItemCollection(),
+            seller: new Seller(),
+        };
+    },
 }, {
-  TYPE_CHECKOUT: 'checkout',
-  TYPE_GIFT: 'gift',
-  TYPE_TIMELINE: 'timeline',
+    TYPE_CHECKOUT: 'checkout',
+    TYPE_GIFT: 'gift',
+    TYPE_TIMELINE: 'timeline',
 });
