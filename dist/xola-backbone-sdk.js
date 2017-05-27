@@ -1,13 +1,13 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("backbone"), require("jquery"), require("underscore"));
+		module.exports = factory(require("backbone"), require("underscore"));
 	else if(typeof define === 'function' && define.amd)
-		define(["backbone", "jquery", "underscore"], factory);
+		define(["backbone", "underscore"], factory);
 	else if(typeof exports === 'object')
-		exports["XolaBackboneSDK"] = factory(require("backbone"), require("jquery"), require("underscore"));
+		exports["XolaBackboneSDK"] = factory(require("backbone"), require("underscore"));
 	else
-		root["XolaBackboneSDK"] = factory(root["Backbone"], root["$"], root["_"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_3__, __WEBPACK_EXTERNAL_MODULE_6__) {
+		root["XolaBackboneSDK"] = factory(root["Backbone"], root["_"]);
+})(this, function(__WEBPACK_EXTERNAL_MODULE_0__, __WEBPACK_EXTERNAL_MODULE_6__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -78,6 +78,12 @@ return /******/ (function(modules) { // webpackBootstrap
 /************************************************************************/
 /******/ ([
 /* 0 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_0__;
+
+/***/ }),
+/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -86,15 +92,13 @@ return /******/ (function(modules) { // webpackBootstrap
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-var Config = exports.Config = {
-    BASE_URL: "http://xola.local/api"
-};
+exports.Experience = undefined;
 
-/***/ }),
-/* 1 */
-/***/ (function(module, exports) {
+var _BaseModel = __webpack_require__(2);
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_1__;
+var Experience = exports.Experience = _BaseModel.BaseModel.extend({
+    urlRoot: "/experiences"
+});
 
 /***/ }),
 /* 2 */
@@ -106,47 +110,26 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_1__;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.Experience = undefined;
-
-var _Base = __webpack_require__(4);
-
-var _Config = __webpack_require__(0);
-
-var Experience = exports.Experience = _Base.Base.extend({
-    urlRoot: function urlRoot() {
-        return _Config.Config.BASE_URL + "/experiences";
-    }
-});
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_3__;
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.Base = undefined;
+exports.BaseModel = undefined;
 
 var _underscore = __webpack_require__(6);
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
-var _backbone = __webpack_require__(1);
+var _backbone = __webpack_require__(0);
 
 var _backbone2 = _interopRequireDefault(_backbone);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var Base = exports.Base = _backbone2.default.Model.extend({
+var BaseModel = exports.BaseModel = _backbone2.default.Model.extend({
+    url: function url() {
+        var base = this.parent ? this.parent.url() : '';
+
+        return base + _backbone2.default.Model.prototype.url.apply(this);
+    },
+
+
     /**
      * Override the default `parse` method so that we can reuse nested models that have already been instantiated.
      * This helps reduce a lot of boilerplate code and also ensures that all listeners are kept intact.
@@ -189,23 +172,83 @@ var Base = exports.Base = _backbone2.default.Model.extend({
 });
 
 /***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.ExperienceCollection = undefined;
+
+var _BaseCollection = __webpack_require__(4);
+
+var _Experience = __webpack_require__(1);
+
+var ExperienceCollection = exports.ExperienceCollection = _BaseCollection.BaseCollection.extend({
+    model: _Experience.Experience
+});
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.BaseCollection = undefined;
+
+var _backbone = __webpack_require__(0);
+
+var _backbone2 = _interopRequireDefault(_backbone);
+
+var _BaseModel = __webpack_require__(2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var BaseCollection = exports.BaseCollection = _backbone2.default.Collection.extend({
+    model: _BaseModel.BaseModel,
+
+    url: function url() {
+        return this.model.prototype.urlRoot;
+    },
+
+
+    /**
+     * Override so we can parse out paging information.
+     *
+     * @param {Object} resp
+     *
+     * @returns {Object} Response model data (without paging information)
+     */
+    parse: function parse(resp) {
+        if (resp.hasOwnProperty("paging") && resp.hasOwnProperty("data")) {
+            return resp.data;
+        }
+
+        return resp;
+    }
+});
+
+/***/ }),
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _jquery = __webpack_require__(3);
-
-var _jquery2 = _interopRequireDefault(_jquery);
-
-var _backbone = __webpack_require__(1);
+var _backbone = __webpack_require__(0);
 
 var _backbone2 = _interopRequireDefault(_backbone);
 
-var _Config = __webpack_require__(0);
+var _Experience = __webpack_require__(1);
 
-var _Experience = __webpack_require__(2);
+var _Experiences = __webpack_require__(3);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -213,17 +256,33 @@ module.exports = {
     Model: {
         Experience: _Experience.Experience
     },
-    Collection: {},
-    init: function init(options) {
-        _Config.Config.BASE_URL = options.BASE_URL || 'https://xola.com/api';
 
-        // if (options.hasOwnProperty('API_KEY')) {
-        //     var headers = Backbone.$.ajaxSetup().headers || {};
-        //     headers["X-API-KEY"] = options['API_KEY'];
-        //     $.ajaxSetup($.ajaxSettings, {
-        //         headers
-        //     });
-        // }
+    Collection: {
+        Experiences: _Experiences.ExperienceCollection
+    },
+
+    setBaseUrl: function setBaseUrl() {
+        var baseUrl = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "http://xola.com/api";
+
+        _backbone2.default.$.ajaxSetup({
+            beforeSend: function beforeSend(jqXHR, settings) {
+                settings.url = baseUrl + settings.url;
+                settings.crossDomain = true;
+            }
+        });
+    },
+    setApiKey: function setApiKey(apiKey) {
+        var headers = _backbone2.default.$.ajaxSetup().headers || {};
+
+        if (apiKey) {
+            headers["X-API-KEY"] = apiKey;
+        } else {
+            delete headers["X-API-KEY"];
+        }
+
+        _backbone2.default.$.ajaxSetup($.ajaxSettings, {
+            headers: headers
+        });
     }
 };
 

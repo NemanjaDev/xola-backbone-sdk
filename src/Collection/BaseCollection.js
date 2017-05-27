@@ -4,6 +4,10 @@ import { BaseModel } from "../Model/BaseModel"
 export const BaseCollection = Backbone.Collection.extend({
     model: BaseModel,
 
+    url() {
+        return this.model.prototype.urlRoot
+    },
+
     /**
      * Override so we can parse out paging information.
      *
@@ -17,5 +21,5 @@ export const BaseCollection = Backbone.Collection.extend({
         }
 
         return resp;
-    },
+    }
 });

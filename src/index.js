@@ -1,8 +1,6 @@
-import $ from "jquery";
 import Backbone from "backbone";
-import { Config } from "./Config";
-
 import { Experience } from "./Model/Experience";
+import { ExperienceCollection } from "./Collection/Experiences";
 
 module.exports = {
     Model: {
@@ -10,11 +8,16 @@ module.exports = {
     },
 
     Collection: {
-
+        Experiences: ExperienceCollection
     },
 
-    setBaseUrl(url) {
-        Config.BASE_URL = url;
+    setBaseUrl(baseUrl = "http://xola.com/api") {
+        Backbone.$.ajaxSetup({
+            beforeSend: function (jqXHR, settings) {
+                settings.url = baseUrl + settings.url;
+                settings.crossDomain = true;
+            }
+        });
     },
 
     setApiKey(apiKey) {
@@ -27,7 +30,7 @@ module.exports = {
             delete headers["X-API-KEY"];
         }
 
-        $.ajaxSetup($.ajaxSettings, {
+        Backbone.$.ajaxSetup($.ajaxSettings, {
             headers
         });
     }
