@@ -6,7 +6,8 @@ import {Payment} from './Payment';
 import {PaymentComment} from './PaymentComment';
 
 export const PaymentMethod = Payment.extend({
-    relativeUri: '/paymentMethods',
+    urlRoot: '/paymentMethods',
+
     parent: null,
 
     defaults() {
@@ -24,13 +25,11 @@ export const PaymentMethod = Payment.extend({
         }
     },
 
-    urlRoot() {
-        let url = this.relativeUri;
-        if (this.parent) {
-            // Using /api/users here instead of this.parent.url() because seller has a /api/sellers url
-            url = `/api/users/${this.parent.id}${this.relativeUri}`;
-        }
-        return url;
+    url() {
+        // Using /users here instead of this.parent.url() because seller has a /sellers url
+        const base = `/users/${this.parent.id}`;
+
+        return base + Backbone.Model.prototype.url.apply(this);
     },
 
     toJSON(...args) {

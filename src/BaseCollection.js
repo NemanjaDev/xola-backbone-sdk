@@ -1,5 +1,5 @@
 import Backbone from "backbone";
-import { BaseModel } from "../Model/BaseModel"
+import { BaseModel } from "./BaseModel"
 
 export const BaseCollection = Backbone.Collection.extend({
     model: BaseModel,

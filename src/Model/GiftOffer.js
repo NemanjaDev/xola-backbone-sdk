@@ -4,9 +4,7 @@ import {Base} from "./discount";
 import {Config} from "../Config";
 
 export const GiftOffer = Base.extend({
-    urlRoot() {
-        return Config.BASE_URL + "/giftOffers"
-    },
+    urlRoot: "/giftOffers",
 
     defaults() {
         return {
@@ -35,9 +33,7 @@ export const GiftOffer = Base.extend({
 
 export const GiftOfferCollection = PageableCollection.extend({
     model: GiftOffer,
-    urlRoot() {
-        return Config.BASE_URL + "/giftOffers"
-    },
+    urlRoot: "/giftOffers",
 
     state: {
         pageSize: 100,

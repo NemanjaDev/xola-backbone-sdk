@@ -5,9 +5,7 @@ import {Product} from './Product';
 import {Config} from "../Config";
 
 export const Gift = Base.extend({
-    urlRoot() {
-        return Config.BASE_URL + "/gifts"
-    },
+    urlRoot: "/gifts",
 
     initialize(data, options) {
         this.options = options || {};

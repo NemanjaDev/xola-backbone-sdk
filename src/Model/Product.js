@@ -5,9 +5,7 @@ import {Experience} from './experience';
 import {GiftOffer} from './GiftOffer';
 
 export const Product = Base.extend({
-    urlRoot() {
-        return Config.BASE_URL + "/products"
-    },
+    urlRoot: "/products",
 
     defaults() {
         return {

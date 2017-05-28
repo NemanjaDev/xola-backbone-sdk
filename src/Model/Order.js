@@ -5,9 +5,7 @@ import {Payment} from "./payment/payment";
 import {AdjustmentCollection} from "./adjustment";
 
 export const Order = Base.extend({
-    urlRoot() {
-        return Config.BASE_URL + "/orders"
-    },
+    urlRoot: "/orders",
 
     /**
      * Return a set of default values. This is required here because the value of payment attribute is an

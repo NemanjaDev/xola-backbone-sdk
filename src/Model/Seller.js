@@ -7,9 +7,7 @@ import {FeeCollection} from './Fee';
 import {PartnerFeeFormulaCollection} from './partner_fee_formula';
 
 export const Seller = Backbone.Model.extend({
-    url() {
-        return UrlHelper.xola(`/api/sellers/${this.get('id')}`);
-    },
+    urlRoot: "/sellers",
 
     defaults() {
         return {

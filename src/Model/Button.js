@@ -1,11 +1,10 @@
-import Backbone from 'backbone';
-import {Base} from "./Base";
-import {Config} from "../Config";
-import {Seller} from './Seller';
-import {Experience} from './experience';
-import {GiftOffer} from './GiftOffer';
+import { BaseModel } from "../BaseModel";
+import { BaseCollection } from "../BaseCollection";
+import { Seller } from './Seller';
+import { Experience } from './experience';
+import { GiftOffer } from './GiftOffer';
 
-export const ButtonItem = Base.extend({
+export const ButtonItem = BaseModel.extend({
 
     defaults() {
         return {
@@ -19,7 +18,7 @@ export const ButtonItem = Base.extend({
     TYPE_GIFT: 'gift',
 });
 
-export const ButtonItemCollection = Backbone.Collection.extend({
+export const ButtonItemCollection = BaseCollection.extend({
     model: ButtonItem,
 
     comparator(buttonItem) {
@@ -27,10 +26,8 @@ export const ButtonItemCollection = Backbone.Collection.extend({
     },
 });
 
-export const Button = Backbone.Model.extend({
-    urlRoot() {
-        return Config.BASE_URL + "/buttons"
-    },
+export const Button = BaseModel.extend({
+    urlRoot: "/buttons",
 
     defaults() {
         return {
