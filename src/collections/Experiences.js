@@ -1,5 +1,5 @@
 import { BaseCollection } from "../BaseCollection";
-import { Experience } from "../Model/Experience";
+import { Experience } from "../models/Experience";
 
 export const ExperienceCollection = BaseCollection.extend({
     model: Experience

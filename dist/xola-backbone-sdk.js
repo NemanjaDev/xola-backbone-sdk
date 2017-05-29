@@ -7,7 +7,7 @@
 		exports["XolaBackboneSDK"] = factory(require("backbone"), require("underscore"));
 	else
 		root["XolaBackboneSDK"] = factory(root["Backbone"], root["_"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_0__, __WEBPACK_EXTERNAL_MODULE_6__) {
+})(this, function(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_10__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -73,35 +73,11 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 5);
+/******/ 	return __webpack_require__(__webpack_require__.s = 9);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_0__;
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.Experience = undefined;
-
-var _BaseModel = __webpack_require__(2);
-
-var Experience = exports.Experience = _BaseModel.BaseModel.extend({
-    urlRoot: "/experiences"
-});
-
-/***/ }),
-/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -112,17 +88,37 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.BaseModel = undefined;
 
-var _underscore = __webpack_require__(6);
+var _underscore = __webpack_require__(10);
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
-var _backbone = __webpack_require__(0);
+var _backbone = __webpack_require__(2);
 
 var _backbone2 = _interopRequireDefault(_backbone);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var BaseModel = exports.BaseModel = _backbone2.default.Model.extend({
+    /**
+     * Override the default `initialize` to support nested models by default.
+     * If overriding this method, make sure you always call BaseModel.prototype.initialize.apply(this, options) first.
+     *
+     * @param parent
+     */
+    initialize: function initialize() {
+        var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+            _ref$parent = _ref.parent,
+            parent = _ref$parent === undefined ? null : _ref$parent;
+
+        this.parent = parent;
+    },
+
+
+    /**
+     * Override the default `url` method so that nested urls can be constructed.
+     *
+     * @returns {string}
+     */
     url: function url() {
         var base = this.parent ? this.parent.url() : '';
 
@@ -138,9 +134,11 @@ var BaseModel = exports.BaseModel = _backbone2.default.Model.extend({
      * @param {Object} options Include a `blacklist` array to indicate the keys that should be skipped
      * @return {Object}
      */
-    parse: function parse(resp, options) {
+    parse: function parse(resp) {
+        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
         if (!resp) return resp;
-        options = options || {};
+
         var response = resp;
 
         // Make sure that the `defaults` on your model is function and not object
@@ -172,6 +170,83 @@ var BaseModel = exports.BaseModel = _backbone2.default.Model.extend({
 });
 
 /***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.BaseCollection = undefined;
+
+var _backbone = __webpack_require__(2);
+
+var _backbone2 = _interopRequireDefault(_backbone);
+
+var _BaseModel = __webpack_require__(0);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var BaseCollection = exports.BaseCollection = _backbone2.default.Collection.extend({
+    model: _BaseModel.BaseModel,
+
+    /**
+     * Override the default `initialize` to support nested models by default.
+     * If overriding this method, make sure you always call BaseModel.prototype.initialize.apply(this, options) first.
+     *
+     * @param parent
+     */
+    initialize: function initialize() {
+        var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+            _ref$parent = _ref.parent,
+            parent = _ref$parent === undefined ? null : _ref$parent;
+
+        this.parent = parent;
+    },
+
+
+    /**
+     * Override default `url` method so that url can be derived from associated model.
+     *
+     * @returns {string}
+     */
+    url: function url() {
+        var base = this.parent ? this.parent.url() : '';
+
+        return base + this.model.prototype.urlRoot;
+    },
+
+
+    /**
+     * Override so we can parse out paging information.
+     *
+     * @param {Object} resp
+     * @returns {Object} Response model data (without paging information)
+     */
+    parse: function parse(resp) {
+        if (resp.hasOwnProperty("paging") && resp.hasOwnProperty("data")) {
+            return resp.data;
+        }
+
+        return resp;
+    }
+}, {
+    buildModelPropertyComparator: function buildModelPropertyComparator(property) {
+        return function (model) {
+            return model.get(property);
+        };
+    }
+});
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
+
+/***/ }),
 /* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -181,14 +256,12 @@ var BaseModel = exports.BaseModel = _backbone2.default.Model.extend({
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.ExperienceCollection = undefined;
+exports.Event = undefined;
 
-var _BaseCollection = __webpack_require__(4);
+var _BaseModel = __webpack_require__(0);
 
-var _Experience = __webpack_require__(1);
-
-var ExperienceCollection = exports.ExperienceCollection = _BaseCollection.BaseCollection.extend({
-    model: _Experience.Experience
+var Event = exports.Event = _BaseModel.BaseModel.extend({
+    urlRoot: "/events"
 });
 
 /***/ }),
@@ -201,38 +274,12 @@ var ExperienceCollection = exports.ExperienceCollection = _BaseCollection.BaseCo
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.BaseCollection = undefined;
+exports.Experience = undefined;
 
-var _backbone = __webpack_require__(0);
+var _BaseModel = __webpack_require__(0);
 
-var _backbone2 = _interopRequireDefault(_backbone);
-
-var _BaseModel = __webpack_require__(2);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var BaseCollection = exports.BaseCollection = _backbone2.default.Collection.extend({
-    model: _BaseModel.BaseModel,
-
-    url: function url() {
-        return this.model.prototype.urlRoot;
-    },
-
-
-    /**
-     * Override so we can parse out paging information.
-     *
-     * @param {Object} resp
-     *
-     * @returns {Object} Response model data (without paging information)
-     */
-    parse: function parse(resp) {
-        if (resp.hasOwnProperty("paging") && resp.hasOwnProperty("data")) {
-            return resp.data;
-        }
-
-        return resp;
-    }
+var Experience = exports.Experience = _BaseModel.BaseModel.extend({
+    urlRoot: "/experiences"
 });
 
 /***/ }),
@@ -242,28 +289,121 @@ var BaseCollection = exports.BaseCollection = _backbone2.default.Collection.exte
 "use strict";
 
 
-var _backbone = __webpack_require__(0);
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.EventCollection = undefined;
+
+var _BaseCollection = __webpack_require__(1);
+
+var _Event = __webpack_require__(3);
+
+var EventCollection = exports.EventCollection = _BaseCollection.BaseCollection.extend({
+    model: _Event.Event
+});
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.ExperienceCollection = undefined;
+
+var _BaseCollection = __webpack_require__(1);
+
+var _Experience = __webpack_require__(4);
+
+var ExperienceCollection = exports.ExperienceCollection = _BaseCollection.BaseCollection.extend({
+    model: _Experience.Experience
+});
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.Seller = undefined;
+
+var _BaseModel = __webpack_require__(0);
+
+var Seller = exports.Seller = _BaseModel.BaseModel.extend({
+    urlRoot: "/sellers"
+});
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.User = undefined;
+
+var _BaseModel = __webpack_require__(0);
+
+var User = exports.User = _BaseModel.BaseModel.extend({
+    urlRoot: "/users"
+});
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _backbone = __webpack_require__(2);
 
 var _backbone2 = _interopRequireDefault(_backbone);
 
-var _Experience = __webpack_require__(1);
+var _BaseModel = __webpack_require__(0);
 
-var _Experiences = __webpack_require__(3);
+var _BaseCollection = __webpack_require__(1);
+
+var _Experience = __webpack_require__(4);
+
+var _Event = __webpack_require__(3);
+
+var _Seller = __webpack_require__(7);
+
+var _User = __webpack_require__(8);
+
+var _Experiences = __webpack_require__(6);
+
+var _Events = __webpack_require__(5);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-module.exports = {
+var XolaBackboneSDK = {
+    BaseModel: _BaseModel.BaseModel,
+    BaseCollection: _BaseCollection.BaseCollection,
+
     Model: {
-        Experience: _Experience.Experience
+        Experience: _Experience.Experience,
+        Event: _Event.Event,
+        Seller: _Seller.Seller,
+        User: _User.User
     },
 
     Collection: {
-        Experiences: _Experiences.ExperienceCollection
+        Experiences: _Experiences.ExperienceCollection,
+        Events: _Events.EventCollection
     },
 
-    setBaseUrl: function setBaseUrl() {
-        var baseUrl = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "http://xola.com/api";
-
+    setBaseUrl: function setBaseUrl(baseUrl) {
         _backbone2.default.$.ajaxSetup({
             beforeSend: function beforeSend(jqXHR, settings) {
                 settings.url = baseUrl + settings.url;
@@ -280,17 +420,21 @@ module.exports = {
             delete headers["X-API-KEY"];
         }
 
-        _backbone2.default.$.ajaxSetup($.ajaxSettings, {
+        _backbone2.default.$.ajaxSetup(_backbone2.default.$.ajaxSettings, {
             headers: headers
         });
     }
 };
 
+XolaBackboneSDK.setBaseUrl("http://xola.com/api");
+
+module.exports = XolaBackboneSDK;
+
 /***/ }),
-/* 6 */
+/* 10 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_6__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_10__;
 
 /***/ })
 /******/ ]);

@@ -2,6 +2,23 @@ import _ from "underscore";
 import Backbone from "backbone";
 
 export const BaseModel = Backbone.Model.extend({
+    /**
+     * Override the default `initialize` to support nested models by default.
+     * If overriding this method, make sure you always call BaseModel.prototype.initialize.apply(this, options) first.
+     *
+     * @param parent
+     */
+    initialize({
+        parent = null
+    } = {}) {
+        this.parent = parent;
+    },
+
+    /**
+     * Override the default `url` method so that nested urls can be constructed.
+     *
+     * @returns {string}
+     */
     url() {
         const base = this.parent ? this.parent.url() : '';
 
@@ -16,9 +33,9 @@ export const BaseModel = Backbone.Model.extend({
      * @param {Object} options Include a `blacklist` array to indicate the keys that should be skipped
      * @return {Object}
      */
-    parse(resp, options) {
+    parse(resp, options = {}) {
         if (!resp) return resp;
-        options = options || {};
+
         var response = resp;
 
         // Make sure that the `defaults` on your model is function and not object
