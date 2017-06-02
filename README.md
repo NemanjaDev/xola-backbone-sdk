@@ -16,14 +16,12 @@ You can [download the latest builds directly](https://github.com/mightytroll/xol
 
 ### Node
 
-When installing through NPM, all dependencies will automatically be resolved.
+When installing through NPM, all dependencies will automatically be resolved. As soon as the first stable release is ready, SDK will be available as npm package.
 
 ```bash
 # NPM
 npm install mightytroll/xola-backbone-sdk
 ```
-
-As soon as the first stable release is ready, SDK will be available as npm package.
 
 ```javascript
 // javascript
@@ -58,7 +56,6 @@ When including the SDK directly in your browser, you will also need to include a
 Regardless of how you choose to install the SDK, you can use it as you would any *Backbone* model or collection.
 
 **Example**
-
 ```javascript
 var seller = new XolaBackboneSDK.Model.Seller({id: SELLER_ID});
 seller.fetch();
@@ -87,11 +84,61 @@ Library is still in development and missing many essential classes. Feel free to
 
 All models extend `Xola.BaseModel` which provides basic functionalities shared across all Xola models like parsing and url generation.
 
-**URL**
+#### Initializing
 
-In most cases, there is no need to override  `url()` method. You should only define `urlRoot` property as a relative path (e.g. "/experiences"). If your model has a nested url structure, you only need to assign `parent` attribute to your model and `BaseModel.url()` will figure out the correct url for you.
+`BaseModel` implements `initialize()` method. If you are overriding it, make sure you call parent method.
+ 
+ **Example**
+ 
+ ```javascript
+ // Example
+ initialize(options) {
+     BaseModel.prototype.initialize.apply(this, arguments);
+ 
+     // Your code here
+ }
+ ```
 
-**Parsing**
+#### URL
+
+In most cases, there is no need to override `url()` method. You should only define `urlRoot` property as a relative path (e.g. "/experiences").
+If your model has a nested url structure, you only need to assign `parent` attribute to your model and `BaseModel.url()` will figure out the correct url for you.
+
+**Example**
+```javascript
+// Root model
+const Experience = BaseModel.extend({
+    urlRoot: "/experiences"
+});
+
+// New model
+let newExperience = new Experience();
+newExperience.url(); // Returns `/experiences`
+
+// Existing model
+let existingExperience = new Experience({id: 1});
+existingExperience.url(); // Returns `/experiences/1`
+
+// Nested model
+const Attachment = BaseModel.extend({
+    urlRoot: "/attachments"
+});
+
+// New nested model
+let newAttachment = new Attachment({
+    parent: existingExperience
+});
+newAttachment.url(); // Returns `/experience/1/attachments`
+
+// Existing nested model
+let newAttachment = new Attachment({
+    parent: existingExperience,
+    id: 9
+});
+newAttachment.url(); // Returns `/experience/1/attachments/9`
+```
+
+#### Parsing
 
 Unless you are building something very specific, there is no need to implement `parse()` method. `BaseModel` figures it out for you.
 
@@ -99,10 +146,24 @@ Unless you are building something very specific, there is no need to implement `
 
 All collection extend `Xola.BaseCollection` which provides basic functionalities shared across all Xola collections like parsing and url generation.
 
-**URL**
+#### Initializing
 
-In most cases, there is no need to override  `url()` method as it is derived from model's `urlRoot` property. You should only define `model` property to your collections.
+`BaseCollection` implements `initialize()` method. If you are overriding it, make sure you call parent method.
+ 
+ **Example**
+ ```javascript
+ initialize(options) {
+     BaseCollection.prototype.initialize.apply(this, arguments);
+ 
+     // Your code here
+ }
+ ```
 
-**Parsing**
+#### URL
 
-`BaseCollection` can figure out if you are working with paged or non-pages collections and will parse data accordingly.
+In most cases, there is no need to override `url()` method as it is derived from model's `urlRoot` property. You should only define `model` property to your collections.
+If your collection has a nested url structure, you only need to assign `parent` attribute to your collection and `BaseCollection.url()` will figure out the correct url for you.
+
+#### Parsing
+
+`BaseCollection` can figure out if you are working with paged or non-paged collections and will parse data accordingly.
