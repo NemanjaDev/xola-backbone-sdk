@@ -29,4 +29,15 @@ describe('BaseModel', () => {
         baseModel.urlRoot = '/foo';
         expect(baseModel.url()).toBe('/bar/foo');
     });
+
+    it("should override parent's urlRoot", () => {
+        const parentModel = new BaseModel({ id: 123 });
+        parentModel.urlRoot = '/bar';
+
+        baseModel = new BaseModel({ id: 456, parent: parentModel });
+        baseModel.urlRoot = '/foo';
+        baseModel.parentUrlRoot = '/baz';
+
+        expect(baseModel.url()).toBe('/baz/123/foo/456');
+    });
 });

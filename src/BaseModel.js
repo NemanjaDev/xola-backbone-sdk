@@ -1,7 +1,32 @@
 import _ from "underscore";
 import Backbone from "backbone";
 
+const url = Backbone.Model.prototype.url;
+
+_.extend(Backbone.Model.prototype, {
+    // Adding possibility to override urlRoot
+    url(urlRoot) {
+        if (urlRoot) {
+            if (this.isNew()) return urlRoot;
+            var id = this.get(this.idAttribute);
+            return urlRoot.replace(/[^\/]$/, '$&/') + encodeURIComponent(id);
+        }
+
+        return url.apply(this);
+    }
+});
+
 export const BaseModel = Backbone.Model.extend({
+    /**
+     *
+     */
+    parent: null,
+
+    /**
+     * Nested models that want to override default URL for the model's representation on the server may override parent's urlRoot property.
+     */
+    parentUrlRoot: null,
+
     /**
      * Override the default `initialize` to support nested models by default.
      * If overriding this method, make sure you always call BaseModel.prototype.initialize.apply(this, options) first.
@@ -20,7 +45,7 @@ export const BaseModel = Backbone.Model.extend({
      * @returns {string}
      */
     url() {
-        const base = this.parent ? this.parent.url() : '';
+        const base = this.parent ? Backbone.Model.prototype.url.apply(this.parent, [this.parentUrlRoot]) : '';
 
         return base + Backbone.Model.prototype.url.apply(this);
     },
