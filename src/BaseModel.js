@@ -1,21 +1,6 @@
 import _ from "underscore";
 import Backbone from "backbone";
 
-const url = Backbone.Model.prototype.url;
-
-_.extend(Backbone.Model.prototype, {
-    // Adding possibility to override urlRoot
-    url(urlRoot) {
-        if (urlRoot) {
-            if (this.isNew()) return urlRoot;
-            var id = this.get(this.idAttribute);
-            return urlRoot.replace(/[^\/]$/, '$&/') + encodeURIComponent(id);
-        }
-
-        return url.apply(this);
-    }
-});
-
 export const BaseModel = Backbone.Model.extend({
     /**
      *
@@ -42,12 +27,27 @@ export const BaseModel = Backbone.Model.extend({
     /**
      * Override the default `url` method so that nested urls can be constructed.
      *
+     * @param {string} urlRoot
      * @returns {string}
      */
-    url() {
-        const base = this.parent ? Backbone.Model.prototype.url.apply(this.parent, [this.parentUrlRoot]) : '';
+    url(urlRoot) {
+        const parentUrl = this.parent ? this.parent.url(this.parentUrlRoot) : '';
 
-        return base + Backbone.Model.prototype.url.apply(this);
+        let url;
+        if (urlRoot) {
+            if (this.isNew()) {
+                url = urlRoot;
+            }
+            else {
+                var id = this.get(this.idAttribute);
+                url = urlRoot.replace(/[^\/]$/, '$&/') + encodeURIComponent(id);
+            }
+        }
+        else {
+            url = Backbone.Model.prototype.url.apply(this);
+        }
+
+        return parentUrl + url;
     },
 
     /**
