@@ -40,4 +40,8 @@ describe('BaseModel', () => {
 
         expect(baseModel.url()).toBe('/baz/123/foo/456');
     });
+
+    it("wshould parse nested model", () => {
+
+    });
 });

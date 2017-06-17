@@ -11,6 +11,8 @@ import { User } from "./models/User";
 import { ExperienceCollection } from "./collections/Experiences";
 import { EventCollection } from "./collections/Events";
 
+import { CollectionPool } from "./CollectionPool";
+
 const XolaBackboneSDK = {
     BaseModel: BaseModel,
     BaseCollection: BaseCollection,
@@ -26,6 +28,8 @@ const XolaBackboneSDK = {
         Experiences: ExperienceCollection,
         Events: EventCollection
     },
+
+    CollectionPool: CollectionPool,
 
     setBaseUrl(baseUrl) {
         Backbone.$.ajaxSetup({

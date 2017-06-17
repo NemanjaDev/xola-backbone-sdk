@@ -66,24 +66,24 @@ export const BaseModel = Backbone.Model.extend({
         // Make sure that the `defaults` on your model is function and not object
         // If `defaults` is an object, that will get overridden by value in latest response
         var attributes = _.defaults(this.attributes, _.result(this, 'defaults', {}));
-        var blacklist = options.blacklist || [];
 
         _.each(response, function(respValue, key) {
-            if (!_.contains(blacklist, key)) {
-                var modelValue = attributes[key];
+            // this.prototype.PARSERS[key]
 
-                if (modelValue instanceof Backbone.Model) {
-                    // This is most likely a Backbone model, so set data into the existing model.
-                    // Do not re-instantiate since the existing model may have listeners on it.
-                    var data = options.parse ? modelValue.parse(respValue, options) : respValue;
-                    modelValue.set(data, options);
-                    response[key] = modelValue;
-                }
+            var modelValue = attributes[key];
 
-                if (modelValue instanceof Backbone.Collection) {
-                    modelValue.set(respValue, options);
-                    response[key] = modelValue;
-                }
+            if (modelValue instanceof Backbone.Model) {
+                // This is most likely a Backbone model, so set data into the existing model.
+                // Do not re-instantiate since the existing model may have listeners on it.
+                var data = options.parse ? modelValue.parse(respValue, options) : respValue;
+                modelValue.set(data, options);
+                response[key] = modelValue;
+                // response[key] = this.prototype.PARSERS[key](modelValue);
+            }
+
+            if (modelValue instanceof Backbone.Collection) {
+                modelValue.set(respValue, options);
+                response[key] = modelValue;
             }
         });
 

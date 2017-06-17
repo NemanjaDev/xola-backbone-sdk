@@ -33,12 +33,26 @@ export const BaseCollection = Backbone.Collection.extend({
      * @param {Object} resp
      * @returns {Object} Response model data (without paging information)
      */
-    parse: function(resp) {
+    parse(resp) {
         if (resp.hasOwnProperty("paging") && resp.hasOwnProperty("data")) {
             return resp.data;
         }
 
         return resp;
+    },
+
+    get(id, create = false) {
+        let model = Backbone.Collection.prototype.get.apply(this, [id]);
+
+        if (!model && create) {
+            let attributes = {};
+            attributes[this.model.idAttribute] = id;
+
+            model = new this.model(attributes);
+            this.add(model);
+        }
+
+        return model;
     }
 }, {
     buildModelPropertyComparator(property) {
