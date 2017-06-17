@@ -1,4 +1,5 @@
 import { BaseModel } from '../src/BaseModel';
+import { Event } from '../src/models/Event';
 
 describe('BaseModel', () => {
     let baseModel;
@@ -41,7 +42,16 @@ describe('BaseModel', () => {
         expect(baseModel.url()).toBe('/baz/123/foo/456');
     });
 
-    it("wshould parse nested model", () => {
+    it("should parse model", () => {
+        const event = new Event({
+            start_date: "2017-06-17T18:02:40",
+            experience: {
+                id: 1
+            }
+        }, { parse: true });
+    });
+
+    it("should parse nested model", () => {
 
     });
 });

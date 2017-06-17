@@ -63,28 +63,30 @@ export const BaseModel = Backbone.Model.extend({
 
         var response = resp;
 
-        // Make sure that the `defaults` on your model is function and not object
-        // If `defaults` is an object, that will get overridden by value in latest response
-        var attributes = _.defaults(this.attributes, _.result(this, 'defaults', {}));
+        _.each(response, (value, key) => {
+            let parsedValue = value;
 
-        _.each(response, function(respValue, key) {
-            // this.prototype.PARSERS[key]
+            if (this.constructor.PARSERS && this.constructor.PARSERS[key]) {
+                parsedValue = this.constructor.PARSERS[key](value, options);
 
-            var modelValue = attributes[key];
+                if (parsedValue instanceof Backbone.Model) {
+                    if (this.has(key) && this.get(key).id == parsedValue.id) {
+                        this.get(key).set(parsedValue.attributes);
 
-            if (modelValue instanceof Backbone.Model) {
-                // This is most likely a Backbone model, so set data into the existing model.
-                // Do not re-instantiate since the existing model may have listeners on it.
-                var data = options.parse ? modelValue.parse(respValue, options) : respValue;
-                modelValue.set(data, options);
-                response[key] = modelValue;
-                // response[key] = this.prototype.PARSERS[key](modelValue);
+                        parsedValue = this.get(key);
+                    }
+                }
+
+                if (parsedValue instanceof Backbone.Collection) {
+                    if (this.has(key)) {
+                        this.get(key).set(parsedValue.models);
+
+                        parsedValue = this.get(key);
+                    }
+                }
             }
 
-            if (modelValue instanceof Backbone.Collection) {
-                modelValue.set(respValue, options);
-                response[key] = modelValue;
-            }
+            response[key] = parsedValue;
         });
 
         return resp;
