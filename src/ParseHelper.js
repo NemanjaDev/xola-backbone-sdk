@@ -7,7 +7,11 @@ export const ParseHelper = {
         return new Date(dateString);
     },
 
-    Model(type) {
+    Locale(localeString) {
+        return localeString.replace('_', '-');
+    },
+
+    Model(type, nested = false) {
         if (type.prototype instanceof BaseCollection) {
             return function(attributes, options) {
                 const idAttribute = type.prototype.model.prototype.idAttribute;
@@ -21,10 +25,12 @@ export const ParseHelper = {
         }
 
         if (type.prototype instanceof BaseModel) {
-            return function(attributes, options) {
-                const model = new type(attributes, { parse: true });
+            return function(attributes, options, parent = null) {
+                if (nested && parent) {
+                    attributes.parent = parent;
+                }
 
-                return model;
+                return new type(attributes, { parse: true });
             }
         }
     },

@@ -61,13 +61,11 @@ export const BaseModel = Backbone.Model.extend({
     parse(resp, options = {}) {
         if (!resp) return resp;
 
-        var response = resp;
-
-        _.each(response, (value, key) => {
+        _.each(resp, (value, key) => {
             let parsedValue = value;
 
             if (this.constructor.PARSERS && this.constructor.PARSERS[key]) {
-                parsedValue = this.constructor.PARSERS[key](value, options);
+                parsedValue = this.constructor.PARSERS[key](value, options, this);
 
                 if (parsedValue instanceof Backbone.Model) {
                     if (this.has(key) && this.get(key).id == parsedValue.id) {
@@ -86,7 +84,7 @@ export const BaseModel = Backbone.Model.extend({
                 }
             }
 
-            response[key] = parsedValue;
+            resp[key] = parsedValue;
         });
 
         return resp;
