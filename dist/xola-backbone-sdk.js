@@ -7,7 +7,7 @@
 		exports["XolaBackboneSDK"] = factory(require("backbone"), require("underscore"));
 	else
 		root["XolaBackboneSDK"] = factory(root["Backbone"], root["_"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_3__, __WEBPACK_EXTERNAL_MODULE_12__) {
+})(this, function(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_3__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 11);
+/******/ 	return __webpack_require__(__webpack_require__.s = 13);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -88,11 +88,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.BaseModel = undefined;
 
-var _underscore = __webpack_require__(12);
+var _underscore = __webpack_require__(3);
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
-var _backbone = __webpack_require__(3);
+var _backbone = __webpack_require__(2);
 
 var _backbone2 = _interopRequireDefault(_backbone);
 
@@ -158,40 +158,39 @@ var BaseModel = exports.BaseModel = _backbone2.default.Model.extend({
      * @return {Object}
      */
     parse: function parse(resp) {
+        var _this = this;
+
         var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-        console.log("PARSE", resp);
+        if (!resp) return resp;
 
-        return _backbone2.default.Model.prototype.parse.apply(this, arguments);
-        // if (!resp) return resp;
-        //
-        // var response = resp;
-        //
-        // // Make sure that the `defaults` on your model is function and not object
-        // // If `defaults` is an object, that will get overridden by value in latest response
-        // var attributes = _.defaults(this.attributes, _.result(this, 'defaults', {}));
-        //
-        // _.each(response, function(respValue, key) {
-        //     // this.prototype.PARSERS[key]
-        //
-        //     var modelValue = attributes[key];
-        //
-        //     if (modelValue instanceof Backbone.Model) {
-        //         // This is most likely a Backbone model, so set data into the existing model.
-        //         // Do not re-instantiate since the existing model may have listeners on it.
-        //         var data = options.parse ? modelValue.parse(respValue, options) : respValue;
-        //         modelValue.set(data, options);
-        //         response[key] = modelValue;
-        //         // response[key] = this.prototype.PARSERS[key](modelValue);
-        //     }
-        //
-        //     if (modelValue instanceof Backbone.Collection) {
-        //         modelValue.set(respValue, options);
-        //         response[key] = modelValue;
-        //     }
-        // });
-        //
-        // return resp;
+        _underscore2.default.each(resp, function (value, key) {
+            var parsedValue = value;
+
+            if (_this.constructor.PARSERS && _this.constructor.PARSERS[key]) {
+                parsedValue = _this.constructor.PARSERS[key](value, options, _this);
+
+                if (parsedValue instanceof _backbone2.default.Model) {
+                    if (_this.has(key) && _this.get(key).id == parsedValue.id) {
+                        _this.get(key).set(parsedValue.attributes);
+
+                        parsedValue = _this.get(key);
+                    }
+                }
+
+                if (parsedValue instanceof _backbone2.default.Collection) {
+                    if (_this.has(key)) {
+                        _this.get(key).set(parsedValue.models);
+
+                        parsedValue = _this.get(key);
+                    }
+                }
+            }
+
+            resp[key] = parsedValue;
+        });
+
+        return resp;
     }
 });
 
@@ -207,7 +206,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.BaseCollection = undefined;
 
-var _backbone = __webpack_require__(3);
+var _backbone = __webpack_require__(2);
 
 var _backbone2 = _interopRequireDefault(_backbone);
 
@@ -265,7 +264,7 @@ var BaseCollection = exports.BaseCollection = _backbone2.default.Collection.exte
 
         if (!model && create) {
             var attributes = {};
-            attributes[this.model.idAttribute] = id;
+            attributes[this.model.prototype.idAttribute] = id;
 
             model = new this.model(attributes);
             this.add(model);
@@ -283,25 +282,9 @@ var BaseCollection = exports.BaseCollection = _backbone2.default.Collection.exte
 
 /***/ }),
 /* 2 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.Experience = undefined;
-
-var _BaseModel = __webpack_require__(0);
-
-var Experience = exports.Experience = _BaseModel.BaseModel.extend({
-    urlRoot: "/experiences",
-
-    defaults: {
-        name: 'Xxx'
-    }
-});
+module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
 
 /***/ }),
 /* 3 */
@@ -345,21 +328,16 @@ var CollectionPool = exports.CollectionPool = {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.Event = undefined;
+exports.ExperienceCollection = undefined;
 
-var _BaseModel = __webpack_require__(0);
+var _BaseCollection = __webpack_require__(1);
 
-var _ParseHelper = __webpack_require__(10);
+var _Experience = __webpack_require__(7);
 
-var _Experience = __webpack_require__(2);
-
-var Event = exports.Event = _BaseModel.BaseModel.extend({
-    urlRoot: "/events"
+var ExperienceCollection = exports.ExperienceCollection = _BaseCollection.BaseCollection.extend({
+    model: _Experience.Experience
 }, {
-    PARSERS: {
-        start_date: _ParseHelper.ParseHelper.Date,
-        experience: _ParseHelper.ParseHelper.Model(_Experience.Experience)
-    }
+    POOL_ID: 'Experiences'
 });
 
 /***/ }),
@@ -372,14 +350,21 @@ var Event = exports.Event = _BaseModel.BaseModel.extend({
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.EventCollection = undefined;
+exports.Event = undefined;
 
-var _BaseCollection = __webpack_require__(1);
+var _BaseModel = __webpack_require__(0);
 
-var _Event = __webpack_require__(5);
+var _ParseHelper = __webpack_require__(9);
 
-var EventCollection = exports.EventCollection = _BaseCollection.BaseCollection.extend({
-    model: _Event.Event
+var _Experiences = __webpack_require__(5);
+
+var Event = exports.Event = _BaseModel.BaseModel.extend({
+    urlRoot: "/events"
+}, {
+    PARSERS: {
+        start_date: _ParseHelper.ParseHelper.Date,
+        experience: _ParseHelper.ParseHelper.Model(_Experiences.ExperienceCollection)
+    }
 });
 
 /***/ }),
@@ -392,16 +377,12 @@ var EventCollection = exports.EventCollection = _BaseCollection.BaseCollection.e
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.ExperienceCollection = undefined;
+exports.Experience = undefined;
 
-var _BaseCollection = __webpack_require__(1);
+var _BaseModel = __webpack_require__(0);
 
-var _Experience = __webpack_require__(2);
-
-var ExperienceCollection = exports.ExperienceCollection = _BaseCollection.BaseCollection.extend({
-    model: _Experience.Experience
-}, {
-    POOL_ID: 'Experiences'
+var Experience = exports.Experience = _BaseModel.BaseModel.extend({
+    urlRoot: "/experiences"
 });
 
 /***/ }),
@@ -414,34 +395,63 @@ var ExperienceCollection = exports.ExperienceCollection = _BaseCollection.BaseCo
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.Seller = undefined;
+exports.User = undefined;
+
+var _underscore = __webpack_require__(3);
+
+var _underscore2 = _interopRequireDefault(_underscore);
 
 var _BaseModel = __webpack_require__(0);
 
-var Seller = exports.Seller = _BaseModel.BaseModel.extend({
-    urlRoot: "/sellers"
+var _ParseHelper = __webpack_require__(9);
+
+var _Meta = __webpack_require__(14);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var UserRoles = {
+    ROLE_SELLER: "ROLE_SELLER",
+    ROLE_SUPER_ADMIN: "ROLE_SUPER_ADMIN",
+    ROLE_ADMIN: "ROLE_ADMIN",
+    ROLE_RESERVATION: "ROLE_RESERVATION",
+    ROLE_RESERVATION_LITE: "ROLE_RESERVATION_LITE",
+    ROLE_GUIDE_MANAGER: "ROLE_GUIDE_MANAGER"
+};
+
+var User = exports.User = _BaseModel.BaseModel.extend({
+    urlRoot: "/users",
+
+    hasRole: function hasRole(role) {
+        return _underscore2.default.contains(this.get('roles'), role);
+    },
+    isSeller: function isSeller() {
+        return this.hasRole(UserRoles.ROLE_SELLER);
+    },
+    isAdmin: function isAdmin() {
+        return this.hasRole(User.ROLE_ADMIN) || this.hasRole(User.ROLE_SUPER_ADMIN);
+    },
+    isReservationist: function isReservationist() {
+        return this.hasRole(User.ROLE_RESERVATION) || this.hasRole(User.ROLE_RESERVATION_LITE);
+    },
+    isGuideManager: function isGuideManager() {
+        return this.hasRole(User.ROLE_GUIDE_MANAGER);
+    }
+}, {
+    ROLE_SELLER: "ROLE_SELLER",
+    ROLE_SUPER_ADMIN: "ROLE_SUPER_ADMIN",
+    ROLE_ADMIN: "ROLE_ADMIN",
+    ROLE_RESERVATION: "ROLE_RESERVATION",
+    ROLE_RESERVATION_LITE: "ROLE_RESERVATION_LITE",
+    ROLE_GUIDE_MANAGER: "ROLE_GUIDE_MANAGER",
+
+    PARSERS: {
+        locale: _ParseHelper.ParseHelper.Locale,
+        meta: _ParseHelper.ParseHelper.Model(_Meta.Meta)
+    }
 });
 
 /***/ }),
 /* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.User = undefined;
-
-var _BaseModel = __webpack_require__(0);
-
-var User = exports.User = _BaseModel.BaseModel.extend({
-    urlRoot: "/users"
-});
-
-/***/ }),
-/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -460,7 +470,7 @@ var _CollectionPool = __webpack_require__(4);
 
 var ParseHelper = exports.ParseHelper = {
     Date: function (_Date) {
-        function Date(_x, _x2, _x3) {
+        function Date(_x) {
             return _Date.apply(this, arguments);
         }
 
@@ -469,33 +479,36 @@ var ParseHelper = exports.ParseHelper = {
         };
 
         return Date;
-    }(function (date, value, options) {
-        return new Date(value);
+    }(function (dateString) {
+        return new Date(dateString);
     }),
+    Locale: function Locale(localeString) {
+        return localeString.replace('_', '-');
+    },
     Model: function Model(type) {
+        var nested = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
         if (type.prototype instanceof _BaseCollection.BaseCollection) {
-            return function (model, attributes, options) {
+            return function (attributes, options) {
                 var idAttribute = type.prototype.model.prototype.idAttribute;
 
-                if (!model || model.id != attributes[idAttribute]) {
-                    model = _CollectionPool.CollectionPool.getCollection(type).get(attributes[idAttribute], true);
-                }
+                var model = _CollectionPool.CollectionPool.getCollection(type).get(attributes[idAttribute], true);
 
-                model.set(attributes, options);
+                model.set(model.parse(attributes, options), options);
 
                 return model;
             };
         }
 
         if (type.prototype instanceof _BaseModel.BaseModel) {
-            return function (model, attributes, options) {
-                if (!model) {
-                    model = new type();
+            return function (attributes, options) {
+                var parent = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+
+                if (nested && parent) {
+                    attributes.parent = parent;
                 }
 
-                model.set(attributes, options);
-
-                return model;
+                return new type(attributes, { parse: true });
             };
         }
     },
@@ -507,13 +520,79 @@ var ParseHelper = exports.ParseHelper = {
 };
 
 /***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.EventCollection = undefined;
+
+var _BaseCollection = __webpack_require__(1);
+
+var _Event = __webpack_require__(6);
+
+var EventCollection = exports.EventCollection = _BaseCollection.BaseCollection.extend({
+    model: _Event.Event
+}, {
+    POOL_ID: 'Events'
+});
+
+/***/ }),
 /* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _backbone = __webpack_require__(3);
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.UserCollection = undefined;
+
+var _BaseCollection = __webpack_require__(1);
+
+var _User = __webpack_require__(8);
+
+var UserCollection = exports.UserCollection = _BaseCollection.BaseCollection.extend({
+    model: _User.User
+}, {
+    POOL_ID: 'Users'
+});
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.Seller = undefined;
+
+var _BaseModel = __webpack_require__(0);
+
+var Seller = exports.Seller = _BaseModel.BaseModel.extend({
+    urlRoot: "/sellers"
+});
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _underscore = __webpack_require__(3);
+
+var _underscore2 = _interopRequireDefault(_underscore);
+
+var _backbone = __webpack_require__(2);
 
 var _backbone2 = _interopRequireDefault(_backbone);
 
@@ -521,21 +600,25 @@ var _BaseModel = __webpack_require__(0);
 
 var _BaseCollection = __webpack_require__(1);
 
-var _Experience = __webpack_require__(2);
+var _Experience = __webpack_require__(7);
 
-var _Event = __webpack_require__(5);
+var _Event = __webpack_require__(6);
 
-var _Seller = __webpack_require__(8);
+var _Seller = __webpack_require__(12);
 
-var _User = __webpack_require__(9);
+var _User = __webpack_require__(8);
 
-var _Experiences = __webpack_require__(7);
+var _Experiences = __webpack_require__(5);
 
-var _Events = __webpack_require__(6);
+var _Events = __webpack_require__(10);
+
+var _Users = __webpack_require__(11);
 
 var _CollectionPool = __webpack_require__(4);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var currentUser = null;
 
 var XolaBackboneSDK = {
     BaseModel: _BaseModel.BaseModel,
@@ -550,7 +633,8 @@ var XolaBackboneSDK = {
 
     Collection: {
         Experiences: _Experiences.ExperienceCollection,
-        Events: _Events.EventCollection
+        Events: _Events.EventCollection,
+        Users: _Users.UserCollection
     },
 
     CollectionPool: _CollectionPool.CollectionPool,
@@ -575,18 +659,79 @@ var XolaBackboneSDK = {
         _backbone2.default.$.ajaxSetup(_backbone2.default.$.ajaxSettings, {
             headers: headers
         });
+    },
+    setApiVersion: function setApiVersion(apiVersion) {
+        var headers = _backbone2.default.$.ajaxSetup().headers || {};
+
+        if (apiVersion) {
+            headers["X-API-VERSION"] = apiVersion;
+        } else {
+            delete headers["X-API-VERSION"];
+        }
+
+        _backbone2.default.$.ajaxSetup(_backbone2.default.$.ajaxSettings, {
+            headers: headers
+        });
+    },
+    login: function login(username, password) {
+        var _this = this;
+
+        var headers = _backbone2.default.$.ajaxSetup().headers || {};
+
+        headers["Authorization"] = 'Basic ' + btoa(username + ':' + password);
+        delete headers["X-API-KEY"];
+
+        _backbone2.default.$.ajaxSetup(_backbone2.default.$.ajaxSettings, {
+            headers: headers
+        });
+
+        var currentUser = _CollectionPool.CollectionPool.getCollection(_Users.UserCollection).get("me", true);
+        currentUser.fetch({
+            success: function success(me) {
+                currentUser = me;
+                _this.setApiKey(me.get("apiKey"));
+
+                _this.trigger("user.login", me);
+            }
+        });
+    },
+    logout: function logout() {
+        this.setApiKey();
+        currentUser = null;
+
+        this.trigger("user.logout");
     }
 };
 
-XolaBackboneSDK.setBaseUrl("http://xola.com/api");
+var sdkInitialized;
+if (!sdkInitialized) {
+    _underscore2.default.extend(XolaBackboneSDK, _backbone2.default.Events);
+
+    XolaBackboneSDK.setBaseUrl("http://xola.local/api");
+    XolaBackboneSDK.setApiVersion("2017-09-13");
+
+    sdkInitialized = true;
+}
 
 module.exports = XolaBackboneSDK;
 
 /***/ }),
-/* 12 */
-/***/ (function(module, exports) {
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_12__;
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.Meta = undefined;
+
+var _BaseModel = __webpack_require__(0);
+
+var Meta = exports.Meta = _BaseModel.BaseModel.extend({
+    urlRoot: "/meta"
+});
 
 /***/ })
 /******/ ]);

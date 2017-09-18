@@ -46,7 +46,7 @@ export const BaseCollection = Backbone.Collection.extend({
 
         if (!model && create) {
             let attributes = {};
-            attributes[this.model.idAttribute] = id;
+            attributes[this.model.prototype.idAttribute] = id;
 
             model = new this.model(attributes);
             this.add(model);

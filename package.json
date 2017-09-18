@@ -7,7 +7,8 @@
     "scripts": {
         "test": "jasmine",
         "build": "webpack --output-filename xola-backbone-sdk.js && npm run build:min",
-        "build:min": "webpack --output-filename xola-backbone-sdk.min.js -p"
+        "build:min": "webpack --output-filename xola-backbone-sdk.min.js -p",
+        "watch": "webpack --output-filename xola-backbone-sdk.js --watch"
     },
     "repository": {
         "type": "git",
@@ -43,6 +44,8 @@
         "underscore": "1.8.3"
     },
     "babel": {
-        "presets": ["es2015"]
+        "presets": [
+            "es2015"
+        ]
     }
 }

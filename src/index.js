@@ -1,3 +1,4 @@
+import _ from "underscore";
 import Backbone from "backbone";
 
 import { BaseModel } from "./BaseModel";
@@ -10,8 +11,11 @@ import { User } from "./models/User";
 
 import { ExperienceCollection } from "./collections/Experiences";
 import { EventCollection } from "./collections/Events";
+import { UserCollection } from "./collections/Users";
 
 import { CollectionPool } from "./CollectionPool";
+
+var currentUser = null;
 
 const XolaBackboneSDK = {
     BaseModel: BaseModel,
@@ -26,7 +30,8 @@ const XolaBackboneSDK = {
 
     Collection: {
         Experiences: ExperienceCollection,
-        Events: EventCollection
+        Events: EventCollection,
+        Users: UserCollection
     },
 
     CollectionPool: CollectionPool,
@@ -53,9 +58,60 @@ const XolaBackboneSDK = {
         Backbone.$.ajaxSetup(Backbone.$.ajaxSettings, {
             headers
         });
+    },
+
+    setApiVersion(apiVersion) {
+        var headers = Backbone.$.ajaxSetup().headers || {};
+
+        if (apiVersion) {
+            headers["X-API-VERSION"] = apiVersion;
+        }
+        else {
+            delete headers["X-API-VERSION"];
+        }
+
+        Backbone.$.ajaxSetup(Backbone.$.ajaxSettings, {
+            headers
+        });
+    },
+
+    login(username, password) {
+        var headers = Backbone.$.ajaxSetup().headers || {};
+
+        headers["Authorization"] = 'Basic ' + btoa(username + ':' + password);
+        delete headers["X-API-KEY"];
+
+        Backbone.$.ajaxSetup(Backbone.$.ajaxSettings, {
+            headers
+        });
+
+        var currentUser = CollectionPool.getCollection(UserCollection).get("me", true);
+        currentUser.fetch({
+            success: (me) => {
+                currentUser = me;
+                this.setApiKey(me.get("apiKey"));
+
+                this.trigger("user.login", me);
+            }
+        });
+    },
+
+    logout() {
+        this.setApiKey();
+        currentUser = null;
+
+        this.trigger("user.logout");
     }
 };
 
-XolaBackboneSDK.setBaseUrl("http://xola.com/api");
+var sdkInitialized;
+if (!sdkInitialized) {
+    _.extend(XolaBackboneSDK, Backbone.Events);
+
+    XolaBackboneSDK.setBaseUrl("http://xola.local/api");
+    XolaBackboneSDK.setApiVersion("2017-09-13");
+
+    sdkInitialized = true;
+}
 
 module.exports = XolaBackboneSDK;

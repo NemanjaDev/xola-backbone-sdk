@@ -7,37 +7,45 @@ describe('BaseModel', () => {
         baseModel = new BaseModel();
     });
 
-    it('should default to null parent when created', () => {
-        expect(baseModel.parent).toBeNull();
+    describe("initialize()", () => {
+        it('should default to null parent', () => {
+            expect(baseModel.parent).toBeNull();
+        });
+
+        it('should set given parent', () => {
+            const parentModel = new BaseModel();
+            baseModel = new BaseModel({ parent: parentModel });
+            expect(baseModel.parent).toBe(parentModel);
+        });
     });
 
-    it('should set given parent when created', () => {
-        const parentModel = new BaseModel();
-        baseModel = new BaseModel({ parent: parentModel });
-        expect(baseModel.parent).toBe(parentModel);
-    });
+    describe("url()", () => {
+        it("should return urlRoot when parent is not set", () => {
+            baseModel.urlRoot = '/foo';
 
-    it('should return correct url when parent is not set', () => {
-        baseModel.urlRoot = '/foo';
-        expect(baseModel.url()).toBe('/foo');
-    });
+            expect(baseModel.url()).toBe('/foo');
+        });
 
-    it('should return nested url when parent is set', () => {
-        const parentModel = new BaseModel();
-        parentModel.urlRoot = '/bar';
-        baseModel = new BaseModel({ parent: parentModel });
-        baseModel.urlRoot = '/foo';
-        expect(baseModel.url()).toBe('/bar/foo');
-    });
+        it("should return nested url when parent is set", () => {
+            const parentModel = new BaseModel();
+            parentModel.urlRoot = '/bar';
 
-    it("should override parent's urlRoot", () => {
-        const parentModel = new BaseModel({ id: 123 });
-        parentModel.urlRoot = '/bar';
+            baseModel.parent = parentModel;
+            baseModel.urlRoot = '/foo';
 
-        baseModel = new BaseModel({ id: 456, parent: parentModel });
-        baseModel.urlRoot = '/foo';
-        baseModel.parentUrlRoot = '/baz';
+            expect(baseModel.url()).toBe('/bar/foo');
+        });
 
-        expect(baseModel.url()).toBe('/baz/123/foo/456');
+        it("should override parent's urlRoot", () => {
+            const parentModel = new BaseModel({ id: 123 });
+            parentModel.urlRoot = '/bar';
+
+            baseModel.set("id", 456);
+            baseModel.parent = parentModel;
+            baseModel.urlRoot = '/foo';
+            baseModel.parentUrlRoot = '/baz';
+
+            expect(baseModel.url()).toBe('/baz/123/foo/456');
+        });
     });
 });

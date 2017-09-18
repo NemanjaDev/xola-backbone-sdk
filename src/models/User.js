@@ -3,6 +3,15 @@ import { BaseModel } from "../BaseModel";
 import { ParseHelper } from "../ParseHelper";
 import { Meta } from "../models/Meta";
 
+const UserRoles = {
+    ROLE_SELLER: "ROLE_SELLER",
+    ROLE_SUPER_ADMIN: "ROLE_SUPER_ADMIN",
+    ROLE_ADMIN: "ROLE_ADMIN",
+    ROLE_RESERVATION: "ROLE_RESERVATION",
+    ROLE_RESERVATION_LITE: "ROLE_RESERVATION_LITE",
+    ROLE_GUIDE_MANAGER: "ROLE_GUIDE_MANAGER"
+};
+
 export const User = BaseModel.extend({
     urlRoot: "/users",
 
@@ -11,30 +20,23 @@ export const User = BaseModel.extend({
     },
 
     isSeller() {
-        return this.hasRole(User.ROLE_SELLER);
+        return this.hasRole(UserRoles.ROLE_SELLER);
     },
 
     isAdmin() {
-        return this.hasRole(User.ROLE_ADMIN) || this.hasRole(User.ROLE_SUPER_ADMIN);
+        return this.hasRole(UserRoles.ROLE_ADMIN) || this.hasRole(UserRoles.ROLE_SUPER_ADMIN);
     },
 
     isReservationist() {
-        return this.hasRole(User.ROLE_RESERVATION) || this.hasRole(User.ROLE_RESERVATION_LITE);
+        return this.hasRole(UserRoles.ROLE_RESERVATION) || this.hasRole(UserRoles.ROLE_RESERVATION_LITE);
     },
 
     isGuideManager() {
-        return this.hasRole(User.ROLE_GUIDE_MANAGER);
+        return this.hasRole(UserRoles.ROLE_GUIDE_MANAGER);
     }
-}, {
-    ROLE_SELLER: "ROLE_SELLER",
-    ROLE_SUPER_ADMIN: "ROLE_SUPER_ADMIN",
-    ROLE_ADMIN: "ROLE_ADMIN",
-    ROLE_RESERVATION: "ROLE_RESERVATION",
-    ROLE_RESERVATION_LITE: "ROLE_RESERVATION_LITE",
-    ROLE_GUIDE_MANAGER: "ROLE_GUIDE_MANAGER",
-
+}, _.extend({
     PARSERS: {
         locale: ParseHelper.Locale,
-        meta: ParseHelper.Model(Meta, true)
+        meta: ParseHelper.Model(Meta)
     }
-});
+}, UserRoles));
