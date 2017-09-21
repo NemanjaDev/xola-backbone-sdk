@@ -1,19 +1,26 @@
+import _ from "underscore";
 import Backbone from "backbone";
 import { BaseModel } from "./BaseModel"
 
 export const BaseCollection = Backbone.Collection.extend({
     model: BaseModel,
+    parent: null,
+    filters: null,
 
     /**
      * Override the default `initialize` to support nested models by default.
      * If overriding this method, make sure you always call BaseModel.prototype.initialize.apply(this, options) first.
      *
-     * @param parent
+     * @param models
+     * @param options
      */
-    initialize({
-        parent = null
-    } = {}) {
-        this.parent = parent;
+    initialize(models = null, options = {}) {
+        _.defaults(options, {
+            parent: null
+        });
+
+        this.parent = options.parent;
+        this.filters = {};
     },
 
     /**
@@ -42,10 +49,10 @@ export const BaseCollection = Backbone.Collection.extend({
     },
 
     get(id, create = false) {
-        let model = Backbone.Collection.prototype.get.apply(this, [id]);
+        var model = Backbone.Collection.prototype.get.apply(this, [id]);
 
         if (!model && create) {
-            let attributes = {};
+            var attributes = {};
             attributes[this.model.prototype.idAttribute] = id;
 
             model = new this.model(attributes);
@@ -53,6 +60,15 @@ export const BaseCollection = Backbone.Collection.extend({
         }
 
         return model;
+    },
+
+    fetch(options = {}) {
+        _.defaults(options, {
+            data: {}
+        });
+        _.extend(options.data, this.filters);
+
+        return Backbone.Collection.prototype.fetch.apply(this, [options]);
     }
 }, {
     buildModelPropertyComparator(property) {

@@ -1,7 +1,7 @@
 import { BaseModel } from '../src/BaseModel';
 
 describe('BaseModel', () => {
-    let baseModel;
+    var baseModel;
 
     beforeEach(() => {
         baseModel = new BaseModel();
@@ -14,7 +14,7 @@ describe('BaseModel', () => {
 
         it('should set given parent', () => {
             const parentModel = new BaseModel();
-            baseModel = new BaseModel({ parent: parentModel });
+            baseModel = new BaseModel(null, { parent: parentModel });
             expect(baseModel.parent).toBe(parentModel);
         });
     });

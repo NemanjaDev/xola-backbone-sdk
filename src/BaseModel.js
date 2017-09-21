@@ -2,9 +2,6 @@ import _ from "underscore";
 import Backbone from "backbone";
 
 export const BaseModel = Backbone.Model.extend({
-    /**
-     *
-     */
     parent: null,
 
     /**
@@ -12,16 +9,21 @@ export const BaseModel = Backbone.Model.extend({
      */
     parentUrlRoot: null,
 
+    filters: null,
+
     /**
      * Override the default `initialize` to support nested models by default.
      * If overriding this method, make sure you always call BaseModel.prototype.initialize.apply(this, options) first.
      *
-     * @param parent
+     * @param options
      */
-    initialize({
-        parent = null
-    } = {}) {
-        this.parent = parent;
+    initialize(attributes, options = {}) {
+        _.defaults(options, {
+            parent: null
+        });
+
+        this.parent = options.parent;
+        this.filters = {};
     },
 
     /**
@@ -33,7 +35,7 @@ export const BaseModel = Backbone.Model.extend({
     url(urlRoot) {
         const parentUrl = this.parent ? this.parent.url(this.parentUrlRoot) : '';
 
-        let url;
+        var url;
         if (urlRoot) {
             if (this.isNew()) {
                 url = urlRoot;
@@ -50,6 +52,15 @@ export const BaseModel = Backbone.Model.extend({
         return parentUrl + url;
     },
 
+    fetch(options = {}) {
+        _.defaults(options, {
+            data: {}
+        });
+        _.extend(options.data, this.filters);
+
+        return Backbone.Model.prototype.fetch.apply(this, [options]);
+    },
+
     /**
      * Override the default `parse` method so that we can reuse nested models that have already been instantiated.
      * This helps reduce a lot of boilerplate code and also ensures that all listeners are kept intact.
@@ -62,7 +73,7 @@ export const BaseModel = Backbone.Model.extend({
         if (!resp) return resp;
 
         _.each(resp, (value, key) => {
-            let parsedValue = value;
+            var parsedValue = value;
 
             if (this.constructor.PARSERS && this.constructor.PARSERS[key]) {
                 parsedValue = this.constructor.PARSERS[key](value, options, this);

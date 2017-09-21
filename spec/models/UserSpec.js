@@ -1,7 +1,7 @@
 import { User } from '../../src/models/User';
 
 describe('User', () => {
-    let user;
+    var user;
 
     const ROLE_1 = "ROLE_1";
     const ROLE_2 = "ROLE_2";

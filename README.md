@@ -112,11 +112,11 @@ const Experience = BaseModel.extend({
 });
 
 // New model
-let newExperience = new Experience();
+var newExperience = new Experience();
 newExperience.url(); // Returns `/experiences`
 
 // Existing model
-let existingExperience = new Experience({id: 1});
+var existingExperience = new Experience({id: 1});
 existingExperience.url(); // Returns `/experiences/1`
 
 // Nested model
@@ -125,13 +125,13 @@ const Attachment = BaseModel.extend({
 });
 
 // New nested model
-let newAttachment = new Attachment({
+var newAttachment = new Attachment({
     parent: existingExperience
 });
 newAttachment.url(); // Returns `/experience/1/attachments`
 
 // Existing nested model
-let newAttachment = new Attachment({
+var newAttachment = new Attachment({
     parent: existingExperience,
     id: 9
 });
