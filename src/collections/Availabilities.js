@@ -10,7 +10,11 @@ export const AvailabilityCollection = BaseCollection.extend({
 
         this.experiences = options.experiences;
 
-        this.listenTo(this, "update", this.onUpdate);
+        this.listenTo(this, "update", () => {
+            this.each((availability) => {
+                availability.parent.getAvailability().set(availability.attributes);
+            });
+        });
     },
 
     parse(resp) {
@@ -21,11 +25,5 @@ export const AvailabilityCollection = BaseCollection.extend({
         });
 
         return array;
-    },
-
-    onUpdate() {
-        this.each((availability) => {
-            availability.parent.getAvailability().set(availability.attributes);
-        });
     }
 });

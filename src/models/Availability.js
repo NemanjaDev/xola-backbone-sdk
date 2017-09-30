@@ -12,5 +12,13 @@ export const Availability = BaseModel.extend({
         delete attributes._experience;
 
         return BaseModel.prototype.parse.call(this, attributes, options);
+    },
+
+    getSlotsByDate(date) {
+        return this.get(date);
+    },
+
+    getSlotsByDateTime(date, time) {
+        return this.getSlotsByDate(date)[time];
     }
 });

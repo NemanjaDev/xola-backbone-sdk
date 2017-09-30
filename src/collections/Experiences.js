@@ -10,11 +10,16 @@ export const ExperienceCollection = BaseCollection.extend({
 
         this.availability = new AvailabilityCollection(null, {experiences: this});
 
-        this.listenTo(this, "update", this.updateAvailabilityFilters);
+        this.listenTo(this, "update", () => {
+            this.availability.filters.experience = this.pluck("id").join(",");
+        });
     },
 
-    updateAvailabilityFilters() {
-        this.availability.filters.experience = this.pluck("id").join(",");
+    /**
+     * @returns { AvailabilityCollection }
+     */
+    getAvailability() {
+        return this.availability;
     }
 }, {
     POOL_ID: 'Experiences'
