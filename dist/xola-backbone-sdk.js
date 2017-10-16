@@ -7,7 +7,7 @@
 		exports["XolaBackboneSDK"] = factory(require("underscore"), require("backbone"));
 	else
 		root["XolaBackboneSDK"] = factory(root["_"], root["Backbone"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_4__) {
+})(this, function(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_3__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 15);
+/******/ 	return __webpack_require__(__webpack_require__.s = 22);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -92,14 +92,14 @@ var _underscore = __webpack_require__(2);
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
-var _backbone = __webpack_require__(4);
+var _backbone = __webpack_require__(3);
 
 var _backbone2 = _interopRequireDefault(_backbone);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var BaseModel = exports.BaseModel = _backbone2.default.Model.extend({
-    //parent: null,
+    parent: null,
 
     /**
      * Nested models that want to override default URL for the model's representation on the server may override parent's urlRoot property.
@@ -114,14 +114,14 @@ var BaseModel = exports.BaseModel = _backbone2.default.Model.extend({
      *
      * @param options
      */
-    initialize: function initialize() {
-        var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    initialize: function initialize(attributes) {
+        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-        //_.defaults(options, {
-        //    parent: null
-        //});
-        //
-        //this.parent = options.parent;
+        _underscore2.default.defaults(options, {
+            parent: null
+        });
+
+        this.parent = options.parent;
         this.filters = {};
     },
 
@@ -222,7 +222,7 @@ var _underscore = __webpack_require__(2);
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
-var _backbone = __webpack_require__(4);
+var _backbone = __webpack_require__(3);
 
 var _backbone2 = _interopRequireDefault(_backbone);
 
@@ -321,6 +321,12 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
 
 /***/ }),
 /* 3 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_3__;
+
+/***/ }),
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -333,175 +339,38 @@ exports.ExperienceCollection = undefined;
 
 var _BaseCollection = __webpack_require__(1);
 
-var _Availabilities = __webpack_require__(14);
+var _Availabilities = __webpack_require__(21);
 
-var _Experience = __webpack_require__(7);
+var _Experience = __webpack_require__(10);
 
 var ExperienceCollection = exports.ExperienceCollection = _BaseCollection.BaseCollection.extend({
     model: _Experience.Experience,
 
     initialize: function initialize() {
+        var _this = this;
+
         _BaseCollection.BaseCollection.prototype.initialize.apply(this, arguments);
 
-        this.availability = new _Availabilities.AvailabilityCollection(null, { igor: 1 });
+        this.availability = new _Availabilities.AvailabilityCollection(null, { experiences: this });
 
-        this.listenTo(this, "update", this.updateAvailabilityFilters);
+        this.listenTo(this, "update", function () {
+            _this.availability.filters.experience = _this.pluck("id").join(",");
+        });
     },
-    updateAvailabilityFilters: function updateAvailabilityFilters() {
-        this.availability.filters.experience = this.pluck("id").join(",");
+
+
+    /**
+     * @returns { AvailabilityCollection }
+     */
+    getAvailability: function getAvailability() {
+        return this.availability;
     }
 }, {
     POOL_ID: 'Experiences'
 });
 
 /***/ }),
-/* 4 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
-
-/***/ }),
 /* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-var collections = {};
-
-var CollectionPool = exports.CollectionPool = {
-    getCollection: function getCollection(Collection) {
-        if (!Collection.hasOwnProperty("POOL_ID")) {
-            throw new Error(Collection + " is not a valid Collection");
-        }
-
-        if (!collections.hasOwnProperty(Collection.POOL_ID)) {
-            collections[Collection.POOL_ID] = new Collection();
-        }
-
-        return collections[Collection.POOL_ID];
-    }
-};
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.Event = undefined;
-
-var _BaseModel = __webpack_require__(0);
-
-var _ParseHelper = __webpack_require__(9);
-
-var _Experiences = __webpack_require__(3);
-
-var Event = exports.Event = _BaseModel.BaseModel.extend({
-    urlRoot: "/events"
-}, {
-    PARSERS: {
-        start_date: _ParseHelper.ParseHelper.Date,
-        experience: _ParseHelper.ParseHelper.Model(_Experiences.ExperienceCollection)
-    }
-});
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.Experience = undefined;
-
-var _BaseModel = __webpack_require__(0);
-
-var _Availability = __webpack_require__(10);
-
-var Experience = exports.Experience = _BaseModel.BaseModel.extend({
-    urlRoot: "/experiences",
-
-    initialize: function initialize() {
-        this.availability = new _Availability.Availability({
-            parent: this
-        });
-    },
-    getAvailability: function getAvailability() {
-        return this.availability;
-    }
-});
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.User = undefined;
-
-var _underscore = __webpack_require__(2);
-
-var _underscore2 = _interopRequireDefault(_underscore);
-
-var _BaseModel = __webpack_require__(0);
-
-var _ParseHelper = __webpack_require__(9);
-
-var _Meta = __webpack_require__(16);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var UserRoles = {
-    ROLE_SELLER: "ROLE_SELLER",
-    ROLE_SUPER_ADMIN: "ROLE_SUPER_ADMIN",
-    ROLE_ADMIN: "ROLE_ADMIN",
-    ROLE_RESERVATION: "ROLE_RESERVATION",
-    ROLE_RESERVATION_LITE: "ROLE_RESERVATION_LITE",
-    ROLE_GUIDE_MANAGER: "ROLE_GUIDE_MANAGER"
-};
-
-var User = exports.User = _BaseModel.BaseModel.extend({
-    urlRoot: "/users",
-
-    hasRole: function hasRole(role) {
-        return _underscore2.default.contains(this.get('roles'), role);
-    },
-    isSeller: function isSeller() {
-        return this.hasRole(UserRoles.ROLE_SELLER);
-    },
-    isAdmin: function isAdmin() {
-        return this.hasRole(UserRoles.ROLE_ADMIN) || this.hasRole(UserRoles.ROLE_SUPER_ADMIN);
-    },
-    isReservationist: function isReservationist() {
-        return this.hasRole(UserRoles.ROLE_RESERVATION) || this.hasRole(UserRoles.ROLE_RESERVATION_LITE);
-    },
-    isGuideManager: function isGuideManager() {
-        return this.hasRole(UserRoles.ROLE_GUIDE_MANAGER);
-    }
-}, _underscore2.default.extend({
-    PARSERS: {
-        locale: _ParseHelper.ParseHelper.Locale,
-        meta: _ParseHelper.ParseHelper.Model(_Meta.Meta)
-    }
-}, UserRoles));
-
-/***/ }),
-/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -516,7 +385,7 @@ var _BaseModel = __webpack_require__(0);
 
 var _BaseCollection = __webpack_require__(1);
 
-var _CollectionPool = __webpack_require__(5);
+var _CollectionPool = __webpack_require__(6);
 
 var ParseHelper = exports.ParseHelper = {
     Date: function (_Date) {
@@ -563,14 +432,336 @@ var ParseHelper = exports.ParseHelper = {
         }
     },
     Collection: function Collection(type) {
-        return function (collection, models) {
-            return new type(models);
+        return function (models, options) {
+            return new type(models, options);
         };
     }
 };
 
 /***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+var collections = {};
+
+var CollectionPool = exports.CollectionPool = {
+    getCollection: function getCollection(Collection) {
+        if (!Collection.hasOwnProperty("POOL_ID")) {
+            throw new Error(Collection + " is not a valid Collection");
+        }
+
+        if (!collections.hasOwnProperty(Collection.POOL_ID)) {
+            collections[Collection.POOL_ID] = new Collection();
+        }
+
+        return collections[Collection.POOL_ID];
+    }
+};
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.DemographicCollection = undefined;
+
+var _BaseCollection = __webpack_require__(1);
+
+var _Demographic = __webpack_require__(8);
+
+var DemographicCollection = exports.DemographicCollection = _BaseCollection.BaseCollection.extend({
+    model: _Demographic.Demographic
+}, {
+    POOL_ID: 'Demographics'
+});
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.Demographic = undefined;
+
+var _BaseModel = __webpack_require__(0);
+
+var Demographic = exports.Demographic = _BaseModel.BaseModel.extend({
+    urlRoot: "/demographics",
+
+    getLabel: function getLabel() {
+        return this.get("label");
+    }
+});
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.Event = undefined;
+
+var _BaseModel = __webpack_require__(0);
+
+var _ParseHelper = __webpack_require__(5);
+
+var _Experiences = __webpack_require__(4);
+
+var Event = exports.Event = _BaseModel.BaseModel.extend({
+    urlRoot: "/events"
+}, {
+    PARSERS: {
+        start_date: _ParseHelper.ParseHelper.Date,
+        experience: _ParseHelper.ParseHelper.Model(_Experiences.ExperienceCollection)
+    }
+});
+
+/***/ }),
 /* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.Experience = undefined;
+
+var _backbone = __webpack_require__(3);
+
+var _backbone2 = _interopRequireDefault(_backbone);
+
+var _BaseModel = __webpack_require__(0);
+
+var _Availability = __webpack_require__(14);
+
+var _Demographics = __webpack_require__(7);
+
+var _ParseHelper = __webpack_require__(5);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Experience = exports.Experience = _BaseModel.BaseModel.extend({
+    urlRoot: "/experiences",
+
+    initialize: function initialize() {
+        _BaseModel.BaseModel.prototype.initialize.apply(this, arguments);
+
+        this.availability = new _Availability.Availability(null, {
+            parent: this
+        });
+    },
+    getAvailability: function getAvailability() {
+        return this.availability;
+    },
+    getDemographics: function getDemographics() {
+        return this.get("demographics");
+    }
+}, {
+    PARSERS: {
+        demographics: _ParseHelper.ParseHelper.Collection(_Demographics.DemographicCollection)
+    }
+});
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.Order = undefined;
+
+var _BaseModel = __webpack_require__(0);
+
+var Order = exports.Order = _BaseModel.BaseModel.extend({
+    urlRoot: "/orders",
+
+    calculateAmount: function calculateAmount() {
+        var totalQuantity = 0;
+        var totalAmount = 0;
+
+        var basePrice = this.get("experience").get("price");
+        var currency = this.get("experience").get("currency");
+
+        // Sum up all the demographics
+        this.get("demographics").each(function (orderDemographic) {
+            var quantity = orderDemographic.get("quantity");
+            var price = orderDemographic.calculatePrice(basePrice);
+            var amount = price * quantity;
+
+            totalQuantity += quantity;
+            totalAmount += amount;
+        });
+
+        // TODO: Sum up all fees
+
+        this.set("quantity", totalQuantity);
+        this.set("amount", totalAmount);
+    },
+    checkIn: function checkIn(options) {
+        var adjustment = new _BaseModel.BaseModel({
+            updates: {
+                guestStatus: "arrived"
+            }
+        }, {
+            parent: this
+        });
+        adjustment.urlRoot = "/modify";
+
+        adjustment.save(null, options);
+    },
+    toJSON: function toJSON() {
+        var json = _BaseModel.BaseModel.prototype.toJSON.apply(this, arguments);
+
+        json.demographics = this.get("demographics").toJSON();
+
+        json.seller = {
+            id: this.get("seller").id
+        };
+
+        json.experience = {
+            id: this.get("experience").id
+        };
+
+        json.payment = this.get("payment").toJSON();
+
+        return json;
+    }
+});
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.OrderDemographic = undefined;
+
+var _BaseModel = __webpack_require__(0);
+
+var OrderDemographic = exports.OrderDemographic = _BaseModel.BaseModel.extend({
+    urlRoot: null,
+
+    initialize: function initialize(attributes) {
+        _BaseModel.BaseModel.prototype.initialize.apply(this, arguments);
+
+        this.set({
+            id: attributes.demographic.id,
+            label: attributes.demographic.getLabel()
+        });
+    },
+    getQuantity: function getQuantity() {
+        return this.get("quantity");
+    },
+    setQuantity: function setQuantity(quantity) {
+        return this.set("quantity", quantity);
+    },
+    calculatePrice: function calculatePrice(basePrice) {
+        var demographic = this.get("demographic");
+        if (demographic.has("discount")) {
+            switch (demographic.get("discount").amountType) {
+                case "absolute":
+                    return basePrice - demographic.get("discount").amount;
+                    break;
+
+                default:
+                    // Unsupported discount type
+                    return basePrice;
+            }
+        } else {
+            return basePrice;
+        }
+    }
+});
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.User = undefined;
+
+var _underscore = __webpack_require__(2);
+
+var _underscore2 = _interopRequireDefault(_underscore);
+
+var _BaseModel = __webpack_require__(0);
+
+var _ParseHelper = __webpack_require__(5);
+
+var _Meta = __webpack_require__(23);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var UserRoles = {
+    ROLE_SELLER: "ROLE_SELLER",
+    ROLE_SUPER_ADMIN: "ROLE_SUPER_ADMIN",
+    ROLE_ADMIN: "ROLE_ADMIN",
+    ROLE_RESERVATION: "ROLE_RESERVATION",
+    ROLE_RESERVATION_LITE: "ROLE_RESERVATION_LITE",
+    ROLE_GUIDE_MANAGER: "ROLE_GUIDE_MANAGER"
+};
+
+var User = exports.User = _BaseModel.BaseModel.extend({
+    urlRoot: "/users",
+
+    hasRole: function hasRole(role) {
+        return _underscore2.default.contains(this.get('roles'), role);
+    },
+    isSeller: function isSeller() {
+        return this.hasRole(UserRoles.ROLE_SELLER);
+    },
+    isAdmin: function isAdmin() {
+        return this.hasRole(UserRoles.ROLE_ADMIN) || this.hasRole(UserRoles.ROLE_SUPER_ADMIN);
+    },
+    isReservationist: function isReservationist() {
+        return this.hasRole(UserRoles.ROLE_RESERVATION) || this.hasRole(UserRoles.ROLE_RESERVATION_LITE);
+    },
+    isGuideManager: function isGuideManager() {
+        return this.hasRole(UserRoles.ROLE_GUIDE_MANAGER);
+    }
+}, _underscore2.default.extend({
+    PARSERS: {
+        locale: _ParseHelper.ParseHelper.Locale,
+        meta: _ParseHelper.ParseHelper.Model(_Meta.Meta)
+    }
+}, UserRoles));
+
+/***/ }),
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -586,13 +777,25 @@ var _BaseModel = __webpack_require__(0);
 var Availability = exports.Availability = _BaseModel.BaseModel.extend({
     urlRoot: "/availability",
 
-    initialize: function initialize(options) {
-        console.log("Availability", arguments);
+    initialize: function initialize() {
+        _BaseModel.BaseModel.prototype.initialize.apply(this, arguments);
+    },
+    parse: function parse(attributes, options) {
+        options.parent = attributes._experience;
+        delete attributes._experience;
+
+        return _BaseModel.BaseModel.prototype.parse.call(this, attributes, options);
+    },
+    getSlotsByDate: function getSlotsByDate(date) {
+        return this.get(date);
+    },
+    getSlotsByDateTime: function getSlotsByDateTime(date, time) {
+        return this.getSlotsByDate(date)[time];
     }
 });
 
 /***/ }),
-/* 11 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -605,7 +808,7 @@ exports.EventCollection = undefined;
 
 var _BaseCollection = __webpack_require__(1);
 
-var _Event = __webpack_require__(6);
+var _Event = __webpack_require__(9);
 
 var EventCollection = exports.EventCollection = _BaseCollection.BaseCollection.extend({
     model: _Event.Event
@@ -614,7 +817,51 @@ var EventCollection = exports.EventCollection = _BaseCollection.BaseCollection.e
 });
 
 /***/ }),
-/* 12 */
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.OrderDemographicCollection = undefined;
+
+var _BaseCollection = __webpack_require__(1);
+
+var _OrderDemographic = __webpack_require__(12);
+
+var OrderDemographicCollection = exports.OrderDemographicCollection = _BaseCollection.BaseCollection.extend({
+    model: _OrderDemographic.OrderDemographic
+}, {
+    POOL_ID: 'OrderDemographics'
+});
+
+/***/ }),
+/* 17 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.OrderCollection = undefined;
+
+var _BaseCollection = __webpack_require__(1);
+
+var _Order = __webpack_require__(11);
+
+var OrderCollection = exports.OrderCollection = _BaseCollection.BaseCollection.extend({
+    model: _Order.Order
+}, {
+    POOL_ID: 'Orders'
+});
+
+/***/ }),
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -627,7 +874,7 @@ exports.UserCollection = undefined;
 
 var _BaseCollection = __webpack_require__(1);
 
-var _User = __webpack_require__(8);
+var _User = __webpack_require__(13);
 
 var UserCollection = exports.UserCollection = _BaseCollection.BaseCollection.extend({
     model: _User.User
@@ -636,7 +883,47 @@ var UserCollection = exports.UserCollection = _BaseCollection.BaseCollection.ext
 });
 
 /***/ }),
-/* 13 */
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.Payment = undefined;
+
+var _underscore = __webpack_require__(2);
+
+var _underscore2 = _interopRequireDefault(_underscore);
+
+var _BaseModel = __webpack_require__(0);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var PaymentMethods = {
+    METHOD_CREDIT_CARD: "cc"
+};
+
+var Payment = exports.Payment = _BaseModel.BaseModel.extend({
+    toJSON: function toJSON() {
+        var json = _BaseModel.BaseModel.prototype.toJSON.apply(this, arguments);
+
+        switch (this.get("method")) {
+            case PaymentMethods.METHOD_CREDIT_CARD:
+                json.card = this.get("card").toJSON();
+                break;
+        }
+
+        return json;
+    }
+}, _underscore2.default.extend({
+    PARSERS: {}
+}, PaymentMethods));
+
+/***/ }),
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -649,7 +936,7 @@ exports.Seller = undefined;
 
 var _BaseModel = __webpack_require__(0);
 
-var _Experiences = __webpack_require__(3);
+var _Experiences = __webpack_require__(4);
 
 var Seller = exports.Seller = _BaseModel.BaseModel.extend({
     urlRoot: "/sellers",
@@ -665,7 +952,7 @@ var Seller = exports.Seller = _BaseModel.BaseModel.extend({
 });
 
 /***/ }),
-/* 14 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -676,39 +963,47 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.AvailabilityCollection = undefined;
 
+var _underscore = __webpack_require__(2);
+
+var _underscore2 = _interopRequireDefault(_underscore);
+
 var _BaseCollection = __webpack_require__(1);
 
-var _Availability = __webpack_require__(10);
+var _Availability = __webpack_require__(14);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var AvailabilityCollection = exports.AvailabilityCollection = _BaseCollection.BaseCollection.extend({
     model: _Availability.Availability,
 
     initialize: function initialize(models, options) {
+        var _this = this;
+
         _BaseCollection.BaseCollection.prototype.initialize.apply(this, arguments);
 
-        console.log("AvailabilityCollection", options);
+        this.experiences = options.experiences;
+
+        this.listenTo(this, "update", function () {
+            _this.each(function (availability) {
+                availability.parent.getAvailability().set(availability.attributes);
+            });
+        });
     },
     parse: function parse(resp) {
+        var _this2 = this;
+
         var array = [];
-        _.each(resp, function (value, key, obj) {
-            value.id = key;
+        _underscore2.default.each(resp, function (value, key, obj) {
+            value._experience = _this2.experiences.get(key);
             array.push(value);
         });
 
         return array;
-
-        //if (resp.hasOwnProperty("paging") && resp.hasOwnProperty("data")) {
-        //    return resp.data;
-        //}
-        //
-        //return [resp];
     }
-}, {
-    POOL_ID: 'Availabilities'
 });
 
 /***/ }),
-/* 15 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -718,7 +1013,7 @@ var _underscore = __webpack_require__(2);
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
-var _backbone = __webpack_require__(4);
+var _backbone = __webpack_require__(3);
 
 var _backbone2 = _interopRequireDefault(_backbone);
 
@@ -726,21 +1021,35 @@ var _BaseModel = __webpack_require__(0);
 
 var _BaseCollection = __webpack_require__(1);
 
-var _Experience = __webpack_require__(7);
+var _Demographic = __webpack_require__(8);
 
-var _Event = __webpack_require__(6);
+var _Experience = __webpack_require__(10);
 
-var _Seller = __webpack_require__(13);
+var _Event = __webpack_require__(9);
 
-var _User = __webpack_require__(8);
+var _Order = __webpack_require__(11);
 
-var _Experiences = __webpack_require__(3);
+var _OrderDemographic = __webpack_require__(12);
 
-var _Events = __webpack_require__(11);
+var _Payment = __webpack_require__(19);
 
-var _Users = __webpack_require__(12);
+var _Seller = __webpack_require__(20);
 
-var _CollectionPool = __webpack_require__(5);
+var _User = __webpack_require__(13);
+
+var _Demographics = __webpack_require__(7);
+
+var _Experiences = __webpack_require__(4);
+
+var _Events = __webpack_require__(15);
+
+var _Orders = __webpack_require__(17);
+
+var _OrderDemographics = __webpack_require__(16);
+
+var _Users = __webpack_require__(18);
+
+var _CollectionPool = __webpack_require__(6);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -751,15 +1060,22 @@ var XolaBackboneSDK = {
     BaseCollection: _BaseCollection.BaseCollection,
 
     Model: {
+        Demographic: _Demographic.Demographic,
         Experience: _Experience.Experience,
         Event: _Event.Event,
+        Order: _Order.Order,
+        OrderDemographic: _OrderDemographic.OrderDemographic,
+        Payment: _Payment.Payment,
         Seller: _Seller.Seller,
         User: _User.User
     },
 
     Collection: {
+        Demographics: _Demographics.DemographicCollection,
         Experiences: _Experiences.ExperienceCollection,
         Events: _Events.EventCollection,
+        Orders: _Orders.OrderCollection,
+        OrderDemographics: _OrderDemographics.OrderDemographicCollection,
         Users: _Users.UserCollection
     },
 
@@ -842,7 +1158,7 @@ if (!sdkInitialized) {
 module.exports = XolaBackboneSDK;
 
 /***/ }),
-/* 16 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

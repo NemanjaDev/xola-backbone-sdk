@@ -4,13 +4,20 @@ import Backbone from "backbone";
 import { BaseModel } from "./BaseModel";
 import { BaseCollection } from "./BaseCollection";
 
+import { Demographic } from "./models/Demographic";
 import { Experience } from "./models/Experience";
 import { Event } from "./models/Event";
+import { Order } from "./models/Order";
+import { OrderDemographic } from "./models/OrderDemographic";
+import { Payment } from "./models/Payment";
 import { Seller } from "./models/Seller";
 import { User } from "./models/User";
 
+import { DemographicCollection } from "./collections/Demographics";
 import { ExperienceCollection } from "./collections/Experiences";
 import { EventCollection } from "./collections/Events";
+import { OrderCollection } from "./collections/Orders";
+import { OrderDemographicCollection } from "./collections/OrderDemographics";
 import { UserCollection } from "./collections/Users";
 
 import { CollectionPool } from "./CollectionPool";
@@ -22,15 +29,22 @@ const XolaBackboneSDK = {
     BaseCollection: BaseCollection,
 
     Model: {
+        Demographic: Demographic,
         Experience: Experience,
         Event: Event,
+        Order: Order,
+        OrderDemographic: OrderDemographic,
+        Payment: Payment,
         Seller: Seller,
         User: User
     },
 
     Collection: {
+        Demographics: DemographicCollection,
         Experiences: ExperienceCollection,
         Events: EventCollection,
+        Orders: OrderCollection,
+        OrderDemographics: OrderDemographicCollection,
         Users: UserCollection
     },
 

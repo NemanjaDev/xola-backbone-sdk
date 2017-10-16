@@ -1,5 +1,8 @@
+import Backbone from "backbone";
 import { BaseModel } from "../BaseModel";
 import { Availability } from "./Availability";
+import { DemographicCollection } from "../collections/Demographics";
+import { ParseHelper } from "../ParseHelper";
 
 export const Experience = BaseModel.extend({
     urlRoot: "/experiences",
@@ -14,5 +17,13 @@ export const Experience = BaseModel.extend({
 
     getAvailability() {
         return this.availability;
+    },
+
+    getDemographics() {
+        return this.get("demographics");
+    }
+}, {
+    PARSERS: {
+        demographics: ParseHelper.Collection(DemographicCollection)
     }
 });

@@ -36,8 +36,8 @@ export const ParseHelper = {
     },
 
     Collection(type) {
-        return function(collection, models) {
-            return new type(models);
+        return function(models, options) {
+            return new type(models, options);
         }
     }
 };
