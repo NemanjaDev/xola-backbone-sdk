@@ -122,7 +122,7 @@ var sdkInitialized;
 if (!sdkInitialized) {
     _.extend(XolaBackboneSDK, Backbone.Events);
 
-    XolaBackboneSDK.setBaseUrl("http://xola.local/api");
+    XolaBackboneSDK.setBaseUrl("https://xola.com/api");
     XolaBackboneSDK.setApiVersion("2017-09-13");
 
     sdkInitialized = true;

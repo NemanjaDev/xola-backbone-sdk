@@ -7,7 +7,7 @@
 		exports["XolaBackboneSDK"] = factory(require("underscore"), require("backbone"));
 	else
 		root["XolaBackboneSDK"] = factory(root["_"], root["Backbone"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_3__) {
+})(this, function(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_4__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 22);
+/******/ 	return __webpack_require__(__webpack_require__.s = 23);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -92,7 +92,7 @@ var _underscore = __webpack_require__(2);
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
-var _backbone = __webpack_require__(3);
+var _backbone = __webpack_require__(4);
 
 var _backbone2 = _interopRequireDefault(_backbone);
 
@@ -222,7 +222,7 @@ var _underscore = __webpack_require__(2);
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
-var _backbone = __webpack_require__(3);
+var _backbone = __webpack_require__(4);
 
 var _backbone2 = _interopRequireDefault(_backbone);
 
@@ -321,12 +321,6 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
 
 /***/ }),
 /* 3 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_3__;
-
-/***/ }),
-/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -368,6 +362,12 @@ var ExperienceCollection = exports.ExperienceCollection = _BaseCollection.BaseCo
 }, {
     POOL_ID: 'Experiences'
 });
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
 
 /***/ }),
 /* 5 */
@@ -524,7 +524,7 @@ var _BaseModel = __webpack_require__(0);
 
 var _ParseHelper = __webpack_require__(5);
 
-var _Experiences = __webpack_require__(4);
+var _Experiences = __webpack_require__(3);
 
 var Event = exports.Event = _BaseModel.BaseModel.extend({
     urlRoot: "/events"
@@ -547,19 +547,15 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.Experience = undefined;
 
-var _backbone = __webpack_require__(3);
-
-var _backbone2 = _interopRequireDefault(_backbone);
-
 var _BaseModel = __webpack_require__(0);
 
 var _Availability = __webpack_require__(14);
 
 var _Demographics = __webpack_require__(7);
 
-var _ParseHelper = __webpack_require__(5);
+var _Fees = __webpack_require__(22);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _ParseHelper = __webpack_require__(5);
 
 var Experience = exports.Experience = _BaseModel.BaseModel.extend({
     urlRoot: "/experiences",
@@ -570,12 +566,21 @@ var Experience = exports.Experience = _BaseModel.BaseModel.extend({
         this.availability = new _Availability.Availability(null, {
             parent: this
         });
+
+        this.fees = new _Fees.FeeCollection(null, {
+            parent: this
+        });
+
+        this.fees.filters.seller = this.get("seller").id;
     },
     getAvailability: function getAvailability() {
         return this.availability;
     },
     getDemographics: function getDemographics() {
         return this.get("demographics");
+    },
+    getFees: function getFees() {
+        return this.fees;
     }
 }, {
     PARSERS: {
@@ -617,7 +622,21 @@ var Order = exports.Order = _BaseModel.BaseModel.extend({
             totalAmount += amount;
         });
 
-        // TODO: Sum up all fees
+        // Sum up all fees
+        this.get("experience").getFees().each(function (fee) {
+            switch (fee.get("scope")) {
+                case "person":
+                    // TODO
+                    break;
+
+                case "outing":
+
+                    break;
+
+                default:
+                // Unsupported fee
+            }
+        });
 
         this.set("quantity", totalQuantity);
         this.set("amount", totalAmount);
@@ -722,7 +741,7 @@ var _BaseModel = __webpack_require__(0);
 
 var _ParseHelper = __webpack_require__(5);
 
-var _Meta = __webpack_require__(23);
+var _Meta = __webpack_require__(25);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -936,7 +955,7 @@ exports.Seller = undefined;
 
 var _BaseModel = __webpack_require__(0);
 
-var _Experiences = __webpack_require__(4);
+var _Experiences = __webpack_require__(3);
 
 var Seller = exports.Seller = _BaseModel.BaseModel.extend({
     urlRoot: "/sellers",
@@ -1009,11 +1028,33 @@ var AvailabilityCollection = exports.AvailabilityCollection = _BaseCollection.Ba
 "use strict";
 
 
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.FeeCollection = undefined;
+
+var _BaseCollection = __webpack_require__(1);
+
+var _Fee = __webpack_require__(24);
+
+var FeeCollection = exports.FeeCollection = _BaseCollection.BaseCollection.extend({
+    model: _Fee.Fee
+}, {
+    POOL_ID: 'Fees'
+});
+
+/***/ }),
+/* 23 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 var _underscore = __webpack_require__(2);
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
-var _backbone = __webpack_require__(3);
+var _backbone = __webpack_require__(4);
 
 var _backbone2 = _interopRequireDefault(_backbone);
 
@@ -1039,7 +1080,7 @@ var _User = __webpack_require__(13);
 
 var _Demographics = __webpack_require__(7);
 
-var _Experiences = __webpack_require__(4);
+var _Experiences = __webpack_require__(3);
 
 var _Events = __webpack_require__(15);
 
@@ -1149,7 +1190,7 @@ var sdkInitialized;
 if (!sdkInitialized) {
     _underscore2.default.extend(XolaBackboneSDK, _backbone2.default.Events);
 
-    XolaBackboneSDK.setBaseUrl("http://xola.local/api");
+    XolaBackboneSDK.setBaseUrl("https://xola.com/api");
     XolaBackboneSDK.setApiVersion("2017-09-13");
 
     sdkInitialized = true;
@@ -1158,7 +1199,25 @@ if (!sdkInitialized) {
 module.exports = XolaBackboneSDK;
 
 /***/ }),
-/* 23 */
+/* 24 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.Fee = undefined;
+
+var _BaseModel = __webpack_require__(0);
+
+var Fee = exports.Fee = _BaseModel.BaseModel.extend({
+    urlRoot: "/fees"
+});
+
+/***/ }),
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

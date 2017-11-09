@@ -20,7 +20,21 @@ export const Order = BaseModel.extend({
             totalAmount += amount;
         });
 
-        // TODO: Sum up all fees
+        // Sum up all fees
+        this.get("experience").getFees().each((fee) => {
+            switch (fee.get("scope")) {
+                case "person":
+                    // TODO
+                    break;
+
+                case "outing":
+
+                    break;
+
+                default:
+                    // Unsupported fee
+            }
+        });
 
         this.set("quantity", totalQuantity);
         this.set("amount", totalAmount);

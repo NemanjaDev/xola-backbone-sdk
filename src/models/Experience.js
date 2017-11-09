@@ -1,7 +1,7 @@
-import Backbone from "backbone";
 import { BaseModel } from "../BaseModel";
 import { Availability } from "./Availability";
 import { DemographicCollection } from "../collections/Demographics";
+import { FeeCollection } from "../collections/Fees";
 import { ParseHelper } from "../ParseHelper";
 
 export const Experience = BaseModel.extend({
@@ -13,6 +13,12 @@ export const Experience = BaseModel.extend({
         this.availability = new Availability(null, {
             parent: this
         });
+
+        this.fees = new FeeCollection(null, {
+            parent: this
+        });
+
+        this.fees.filters.seller = this.get("seller").id;
     },
 
     getAvailability() {
@@ -21,6 +27,10 @@ export const Experience = BaseModel.extend({
 
     getDemographics() {
         return this.get("demographics");
+    },
+
+    getFees() {
+        return this.fees;
     }
 }, {
     PARSERS: {
