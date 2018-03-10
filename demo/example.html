@@ -14,6 +14,8 @@
 </head>
 <body>
     <script type="text/javascript">
+
+        XolaBackboneSDK.Config.baseUrl = "http://xola.local/api";
         XolaBackboneSDK.on("user.login", (user) => {
             console.log("Logged in as " + user.get("name"));
         });

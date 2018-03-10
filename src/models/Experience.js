@@ -25,10 +25,6 @@ export const Experience = BaseModel.extend({
         return this.availability;
     },
 
-    getDemographics() {
-        return this.get("demographics");
-    },
-
     getFees() {
         return this.fees;
     }

@@ -7,7 +7,7 @@
 		exports["XolaBackboneSDK"] = factory(require("underscore"), require("backbone"));
 	else
 		root["XolaBackboneSDK"] = factory(root["_"], root["Backbone"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_4__) {
+})(this, function(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_6__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 23);
+/******/ 	return __webpack_require__(__webpack_require__.s = 26);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -92,9 +92,13 @@ var _underscore = __webpack_require__(2);
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
-var _backbone = __webpack_require__(4);
+var _backbone = __webpack_require__(6);
 
 var _backbone2 = _interopRequireDefault(_backbone);
+
+var _Config = __webpack_require__(3);
+
+var _Account = __webpack_require__(5);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -149,6 +153,25 @@ var BaseModel = exports.BaseModel = _backbone2.default.Model.extend({
 
         return parentUrl + url;
     },
+    sync: function sync(method, model, options) {
+        var _this = this;
+
+        var beforeSend = options.beforeSend;
+        options.beforeSend = function (jqXHR, settings) {
+            settings.url = _Config.Config.baseUrl + settings.url;
+            settings.crossDomain = true;
+
+            if (_Account.Account.currentUser && _Account.Account.currentUser.has('apiKey')) {
+                jqXHR.setRequestHeader("X-API-KEY", _Account.Account.currentUser.get('apiKey'));
+            }
+
+            jqXHR.setRequestHeader("X-API-VERSION", _Config.Config.apiVersion);
+
+            if (beforeSend) return beforeSend.call(_this, jqXHR, settings);
+        };
+
+        return _backbone2.default.Model.prototype.sync.call(this, method, model, options);
+    },
     fetch: function fetch() {
         var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
@@ -170,7 +193,7 @@ var BaseModel = exports.BaseModel = _backbone2.default.Model.extend({
      * @return {Object}
      */
     parse: function parse(resp) {
-        var _this = this;
+        var _this2 = this;
 
         var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
@@ -179,22 +202,22 @@ var BaseModel = exports.BaseModel = _backbone2.default.Model.extend({
         _underscore2.default.each(resp, function (value, key) {
             var parsedValue = value;
 
-            if (_this.constructor.PARSERS && _this.constructor.PARSERS[key]) {
-                parsedValue = _this.constructor.PARSERS[key](value, options, _this);
+            if (_this2.constructor.PARSERS && _this2.constructor.PARSERS[key]) {
+                parsedValue = _this2.constructor.PARSERS[key](value, options, _this2);
 
                 if (parsedValue instanceof _backbone2.default.Model) {
-                    if (_this.has(key) && _this.get(key).id == parsedValue.id) {
-                        _this.get(key).set(parsedValue.attributes);
+                    if (_this2.has(key) && _this2.get(key).id == parsedValue.id) {
+                        _this2.get(key).set(parsedValue.attributes);
 
-                        parsedValue = _this.get(key);
+                        parsedValue = _this2.get(key);
                     }
                 }
 
                 if (parsedValue instanceof _backbone2.default.Collection) {
-                    if (_this.has(key)) {
-                        _this.get(key).set(parsedValue.models);
+                    if (_this2.has(key)) {
+                        _this2.get(key).set(parsedValue.models);
 
-                        parsedValue = _this.get(key);
+                        parsedValue = _this2.get(key);
                     }
                 }
             }
@@ -222,11 +245,15 @@ var _underscore = __webpack_require__(2);
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
-var _backbone = __webpack_require__(4);
+var _backbone = __webpack_require__(6);
 
 var _backbone2 = _interopRequireDefault(_backbone);
 
 var _BaseModel = __webpack_require__(0);
+
+var _Config = __webpack_require__(3);
+
+var _Account = __webpack_require__(5);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -262,8 +289,9 @@ var BaseCollection = exports.BaseCollection = _backbone2.default.Collection.exte
      */
     url: function url() {
         var base = this.parent ? this.parent.url() : '';
+        var urlRoot = this.urlRoot ? this.urlRoot : this.model.prototype.urlRoot;
 
-        return base + this.model.prototype.urlRoot;
+        return base + urlRoot;
     },
 
 
@@ -280,15 +308,33 @@ var BaseCollection = exports.BaseCollection = _backbone2.default.Collection.exte
 
         return resp;
     },
+    sync: function sync(method, model, options) {
+        var _this = this;
+
+        var beforeSend = options.beforeSend;
+        options.beforeSend = function (jqXHR, settings) {
+            settings.url = _Config.Config.baseUrl + settings.url;
+            settings.crossDomain = true;
+
+            if (_Account.Account.currentUser && _Account.Account.currentUser.has('apiKey')) {
+                jqXHR.setRequestHeader("X-API-KEY", _Account.Account.currentUser.get('apiKey'));
+            }
+
+            jqXHR.setRequestHeader("X-API-VERSION", _Config.Config.apiVersion);
+
+            if (beforeSend) return beforeSend.call(_this, jqXHR, settings);
+        };
+
+        return _backbone2.default.Model.prototype.sync.call(this, method, model, options);
+    },
     get: function get(id) {
         var create = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
-        var model = _backbone2.default.Collection.prototype.get.apply(this, [id]);
+        var model = _backbone2.default.Collection.prototype.get.call(this, id);
 
         if (!model && create) {
             var attributes = {};
             attributes[this.model.prototype.idAttribute] = id;
-
             model = new this.model(attributes);
             this.add(model);
         }
@@ -329,13 +375,28 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+var Config = exports.Config = {
+    apiVersion: "2017-09-13",
+    baseUrl: "https://xola.com/api"
+};
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
 exports.ExperienceCollection = undefined;
 
 var _BaseCollection = __webpack_require__(1);
 
-var _Availabilities = __webpack_require__(21);
+var _Availabilities = __webpack_require__(24);
 
-var _Experience = __webpack_require__(10);
+var _Experience = __webpack_require__(12);
 
 var ExperienceCollection = exports.ExperienceCollection = _BaseCollection.BaseCollection.extend({
     model: _Experience.Experience,
@@ -364,13 +425,27 @@ var ExperienceCollection = exports.ExperienceCollection = _BaseCollection.BaseCo
 });
 
 /***/ }),
-/* 4 */
-/***/ (function(module, exports) {
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_4__;
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+var Account = exports.Account = {
+    currentUser: null
+};
 
 /***/ }),
-/* 5 */
+/* 6 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_6__;
+
+/***/ }),
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -385,7 +460,7 @@ var _BaseModel = __webpack_require__(0);
 
 var _BaseCollection = __webpack_require__(1);
 
-var _CollectionPool = __webpack_require__(6);
+var _CollectionPool = __webpack_require__(8);
 
 var ParseHelper = exports.ParseHelper = {
     Date: function (_Date) {
@@ -439,7 +514,7 @@ var ParseHelper = exports.ParseHelper = {
 };
 
 /***/ }),
-/* 6 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -465,7 +540,7 @@ var CollectionPool = exports.CollectionPool = {
 };
 
 /***/ }),
-/* 7 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -478,7 +553,7 @@ exports.DemographicCollection = undefined;
 
 var _BaseCollection = __webpack_require__(1);
 
-var _Demographic = __webpack_require__(8);
+var _Demographic = __webpack_require__(10);
 
 var DemographicCollection = exports.DemographicCollection = _BaseCollection.BaseCollection.extend({
     model: _Demographic.Demographic
@@ -487,7 +562,7 @@ var DemographicCollection = exports.DemographicCollection = _BaseCollection.Base
 });
 
 /***/ }),
-/* 8 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -509,7 +584,7 @@ var Demographic = exports.Demographic = _BaseModel.BaseModel.extend({
 });
 
 /***/ }),
-/* 9 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -522,9 +597,9 @@ exports.Event = undefined;
 
 var _BaseModel = __webpack_require__(0);
 
-var _ParseHelper = __webpack_require__(5);
+var _ParseHelper = __webpack_require__(7);
 
-var _Experiences = __webpack_require__(3);
+var _Experiences = __webpack_require__(4);
 
 var Event = exports.Event = _BaseModel.BaseModel.extend({
     urlRoot: "/events"
@@ -536,7 +611,7 @@ var Event = exports.Event = _BaseModel.BaseModel.extend({
 });
 
 /***/ }),
-/* 10 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -549,13 +624,13 @@ exports.Experience = undefined;
 
 var _BaseModel = __webpack_require__(0);
 
-var _Availability = __webpack_require__(14);
+var _Availability = __webpack_require__(16);
 
-var _Demographics = __webpack_require__(7);
+var _Demographics = __webpack_require__(9);
 
-var _Fees = __webpack_require__(22);
+var _Fees = __webpack_require__(25);
 
-var _ParseHelper = __webpack_require__(5);
+var _ParseHelper = __webpack_require__(7);
 
 var Experience = exports.Experience = _BaseModel.BaseModel.extend({
     urlRoot: "/experiences",
@@ -576,9 +651,6 @@ var Experience = exports.Experience = _BaseModel.BaseModel.extend({
     getAvailability: function getAvailability() {
         return this.availability;
     },
-    getDemographics: function getDemographics() {
-        return this.get("demographics");
-    },
     getFees: function getFees() {
         return this.fees;
     }
@@ -589,7 +661,7 @@ var Experience = exports.Experience = _BaseModel.BaseModel.extend({
 });
 
 /***/ }),
-/* 11 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -600,17 +672,22 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.Order = undefined;
 
+var _BaseCollection = __webpack_require__(1);
+
 var _BaseModel = __webpack_require__(0);
+
+var _Fee = __webpack_require__(17);
 
 var Order = exports.Order = _BaseModel.BaseModel.extend({
     urlRoot: "/orders",
 
     calculateAmount: function calculateAmount() {
-        var totalQuantity = 0;
-        var totalAmount = 0;
+        var _this = this;
 
         var basePrice = this.get("experience").get("price");
         var currency = this.get("experience").get("currency");
+        var baseAmount = basePrice;
+        var totalQuantity = 0;
 
         // Sum up all the demographics
         this.get("demographics").each(function (orderDemographic) {
@@ -619,25 +696,50 @@ var Order = exports.Order = _BaseModel.BaseModel.extend({
             var amount = price * quantity;
 
             totalQuantity += quantity;
-            totalAmount += amount;
+            baseAmount += amount;
         });
 
-        // Sum up all fees
+        var totalAmount = baseAmount;
+
+        var totalFeeAmount = 0;
+        var adjustments = new _BaseCollection.BaseCollection();
         this.get("experience").getFees().each(function (fee) {
+            var feeAmount = 0;
             switch (fee.get("scope")) {
-                case "person":
-                    // TODO
+                case _Fee.Fee.SCOPE_PERSON:
+                    feeAmount = fee.get('amount') * totalQuantity;
                     break;
 
-                case "outing":
+                case _Fee.Fee.SCOPE_OUTING:
+                    switch (fee.get("amountType")) {
+                        case _Fee.Fee.AMOUNT_TYPE_ABSOLUTE:
+                            feeAmount = _this.get('amount');
+                            break;
 
+                        case _Fee.Fee.AMOUNT_TYPE_PERCENT:
+                            feeAmount = baseAmount * fee.get('amount') / 100;
+                            break;
+                    }
                     break;
 
                 default:
                 // Unsupported fee
             }
+
+            adjustments.add(new _BaseModel.BaseModel({
+                type: "fee",
+                amount: feeAmount,
+                caption: "Fee",
+                code: fee.id,
+                meta: { fee: fee }
+            }));
+
+            totalFeeAmount += feeAmount;
         });
 
+        totalAmount += totalFeeAmount;
+
+        this.set("adjustments", adjustments);
         this.set("quantity", totalQuantity);
         this.set("amount", totalAmount);
     },
@@ -656,24 +758,32 @@ var Order = exports.Order = _BaseModel.BaseModel.extend({
     toJSON: function toJSON() {
         var json = _BaseModel.BaseModel.prototype.toJSON.apply(this, arguments);
 
-        json.demographics = this.get("demographics").toJSON();
+        if (this.get("demographics")) {
+            json.demographics = this.get("demographics").toJSON();
+        }
 
-        json.seller = {
-            id: this.get("seller").id
-        };
+        if (this.get("seller")) {
+            json.seller = {
+                id: this.get("seller").id
+            };
+        }
 
-        json.experience = {
-            id: this.get("experience").id
-        };
+        if (this.get("experience")) {
+            json.experience = {
+                id: this.get("experience").id
+            };
+        }
 
-        json.payment = this.get("payment").toJSON();
+        if (this.get("payment")) {
+            json.payment = this.get("payment").toJSON();
+        }
 
         return json;
     }
 });
 
 /***/ }),
-/* 12 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -722,7 +832,7 @@ var OrderDemographic = exports.OrderDemographic = _BaseModel.BaseModel.extend({
 });
 
 /***/ }),
-/* 13 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -731,7 +841,7 @@ var OrderDemographic = exports.OrderDemographic = _BaseModel.BaseModel.extend({
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.User = undefined;
+exports.DelegatorCollection = exports.User = undefined;
 
 var _underscore = __webpack_require__(2);
 
@@ -739,9 +849,11 @@ var _underscore2 = _interopRequireDefault(_underscore);
 
 var _BaseModel = __webpack_require__(0);
 
-var _ParseHelper = __webpack_require__(5);
+var _ParseHelper = __webpack_require__(7);
 
-var _Meta = __webpack_require__(25);
+var _Meta = __webpack_require__(27);
+
+var _BaseCollection = __webpack_require__(1);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -757,6 +869,14 @@ var UserRoles = {
 var User = exports.User = _BaseModel.BaseModel.extend({
     urlRoot: "/users",
 
+    initialize: function initialize() {
+        _BaseModel.BaseModel.prototype.initialize.apply(this, arguments);
+
+        this.delegators = new DelegatorCollection(null, {
+            parent: this
+        });
+        this.delegators.urlRoot = '/delegators';
+    },
     hasRole: function hasRole(role) {
         return _underscore2.default.contains(this.get('roles'), role);
     },
@@ -771,6 +891,9 @@ var User = exports.User = _BaseModel.BaseModel.extend({
     },
     isGuideManager: function isGuideManager() {
         return this.hasRole(UserRoles.ROLE_GUIDE_MANAGER);
+    },
+    getDelegators: function getDelegators() {
+        return this.delegators;
     }
 }, _underscore2.default.extend({
     PARSERS: {
@@ -779,8 +902,32 @@ var User = exports.User = _BaseModel.BaseModel.extend({
     }
 }, UserRoles));
 
+var Delegators = _BaseModel.BaseModel.extend({
+    urlRoot: "/delegators"
+});
+
+var DelegatorCollection = exports.DelegatorCollection = _BaseCollection.BaseCollection.extend({
+    model: User, //Backbone.Model,
+
+    /**
+     * Override so we can parse out paging information.
+     *
+     * @param {Object} resp
+     * @returns {Object} Response model data (without paging information)
+     */
+    parse: function parse(resp) {
+        if (resp.hasOwnProperty("sellers")) {
+            return resp.sellers;
+        }
+
+        return resp;
+    }
+}, {
+    POOL_ID: 'Delegators'
+});
+
 /***/ }),
-/* 14 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -814,50 +961,6 @@ var Availability = exports.Availability = _BaseModel.BaseModel.extend({
 });
 
 /***/ }),
-/* 15 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.EventCollection = undefined;
-
-var _BaseCollection = __webpack_require__(1);
-
-var _Event = __webpack_require__(9);
-
-var EventCollection = exports.EventCollection = _BaseCollection.BaseCollection.extend({
-    model: _Event.Event
-}, {
-    POOL_ID: 'Events'
-});
-
-/***/ }),
-/* 16 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.OrderDemographicCollection = undefined;
-
-var _BaseCollection = __webpack_require__(1);
-
-var _OrderDemographic = __webpack_require__(12);
-
-var OrderDemographicCollection = exports.OrderDemographicCollection = _BaseCollection.BaseCollection.extend({
-    model: _OrderDemographic.OrderDemographic
-}, {
-    POOL_ID: 'OrderDemographics'
-});
-
-/***/ }),
 /* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -867,16 +970,18 @@ var OrderDemographicCollection = exports.OrderDemographicCollection = _BaseColle
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.OrderCollection = undefined;
+exports.Fee = undefined;
 
-var _BaseCollection = __webpack_require__(1);
+var _BaseModel = __webpack_require__(0);
 
-var _Order = __webpack_require__(11);
-
-var OrderCollection = exports.OrderCollection = _BaseCollection.BaseCollection.extend({
-    model: _Order.Order
+var Fee = exports.Fee = _BaseModel.BaseModel.extend({
+    urlRoot: "/fees"
 }, {
-    POOL_ID: 'Orders'
+    AMOUNT_TYPE_PERCENT: 'percent',
+    AMOUNT_TYPE_ABSOLUTE: 'absolute',
+
+    SCOPE_PERSON: 'person',
+    SCOPE_OUTING: 'outing'
 });
 
 /***/ }),
@@ -889,20 +994,88 @@ var OrderCollection = exports.OrderCollection = _BaseCollection.BaseCollection.e
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.EventCollection = undefined;
+
+var _BaseCollection = __webpack_require__(1);
+
+var _Event = __webpack_require__(11);
+
+var EventCollection = exports.EventCollection = _BaseCollection.BaseCollection.extend({
+    model: _Event.Event
+}, {
+    POOL_ID: 'Events'
+});
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.OrderDemographicCollection = undefined;
+
+var _BaseCollection = __webpack_require__(1);
+
+var _OrderDemographic = __webpack_require__(14);
+
+var OrderDemographicCollection = exports.OrderDemographicCollection = _BaseCollection.BaseCollection.extend({
+    model: _OrderDemographic.OrderDemographic
+}, {
+    POOL_ID: 'OrderDemographics'
+});
+
+/***/ }),
+/* 20 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.OrderCollection = undefined;
+
+var _BaseCollection = __webpack_require__(1);
+
+var _Order = __webpack_require__(13);
+
+var OrderCollection = exports.OrderCollection = _BaseCollection.BaseCollection.extend({
+    model: _Order.Order
+}, {
+    POOL_ID: 'Orders'
+});
+
+/***/ }),
+/* 21 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
 exports.UserCollection = undefined;
 
 var _BaseCollection = __webpack_require__(1);
 
-var _User = __webpack_require__(13);
+var _User = __webpack_require__(15);
 
 var UserCollection = exports.UserCollection = _BaseCollection.BaseCollection.extend({
-    model: _User.User
+    model: function model() {
+        _User.User;
+    }
 }, {
     POOL_ID: 'Users'
 });
 
 /***/ }),
-/* 19 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -942,7 +1115,7 @@ var Payment = exports.Payment = _BaseModel.BaseModel.extend({
 }, PaymentMethods));
 
 /***/ }),
-/* 20 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -955,7 +1128,7 @@ exports.Seller = undefined;
 
 var _BaseModel = __webpack_require__(0);
 
-var _Experiences = __webpack_require__(3);
+var _Experiences = __webpack_require__(4);
 
 var Seller = exports.Seller = _BaseModel.BaseModel.extend({
     urlRoot: "/sellers",
@@ -971,7 +1144,7 @@ var Seller = exports.Seller = _BaseModel.BaseModel.extend({
 });
 
 /***/ }),
-/* 21 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -988,7 +1161,7 @@ var _underscore2 = _interopRequireDefault(_underscore);
 
 var _BaseCollection = __webpack_require__(1);
 
-var _Availability = __webpack_require__(14);
+var _Availability = __webpack_require__(16);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1022,7 +1195,7 @@ var AvailabilityCollection = exports.AvailabilityCollection = _BaseCollection.Ba
 });
 
 /***/ }),
-/* 22 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1035,7 +1208,7 @@ exports.FeeCollection = undefined;
 
 var _BaseCollection = __webpack_require__(1);
 
-var _Fee = __webpack_require__(24);
+var _Fee = __webpack_require__(17);
 
 var FeeCollection = exports.FeeCollection = _BaseCollection.BaseCollection.extend({
     model: _Fee.Fee
@@ -1044,7 +1217,7 @@ var FeeCollection = exports.FeeCollection = _BaseCollection.BaseCollection.exten
 });
 
 /***/ }),
-/* 23 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1054,47 +1227,49 @@ var _underscore = __webpack_require__(2);
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
-var _backbone = __webpack_require__(4);
+var _backbone = __webpack_require__(6);
 
 var _backbone2 = _interopRequireDefault(_backbone);
+
+var _Config = __webpack_require__(3);
 
 var _BaseModel = __webpack_require__(0);
 
 var _BaseCollection = __webpack_require__(1);
 
-var _Demographic = __webpack_require__(8);
+var _Demographic = __webpack_require__(10);
 
-var _Experience = __webpack_require__(10);
+var _Experience = __webpack_require__(12);
 
-var _Event = __webpack_require__(9);
+var _Event = __webpack_require__(11);
 
-var _Order = __webpack_require__(11);
+var _Order = __webpack_require__(13);
 
-var _OrderDemographic = __webpack_require__(12);
+var _OrderDemographic = __webpack_require__(14);
 
-var _Payment = __webpack_require__(19);
+var _Payment = __webpack_require__(22);
 
-var _Seller = __webpack_require__(20);
+var _Seller = __webpack_require__(23);
 
-var _User = __webpack_require__(13);
+var _User = __webpack_require__(15);
 
-var _Demographics = __webpack_require__(7);
+var _Demographics = __webpack_require__(9);
 
-var _Experiences = __webpack_require__(3);
+var _Experiences = __webpack_require__(4);
 
-var _Events = __webpack_require__(15);
+var _Events = __webpack_require__(18);
 
-var _Orders = __webpack_require__(17);
+var _Orders = __webpack_require__(20);
 
-var _OrderDemographics = __webpack_require__(16);
+var _OrderDemographics = __webpack_require__(19);
 
-var _Users = __webpack_require__(18);
+var _Users = __webpack_require__(21);
 
-var _CollectionPool = __webpack_require__(6);
+var _CollectionPool = __webpack_require__(8);
+
+var _Account = __webpack_require__(5);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var currentUser = null;
 
 var XolaBackboneSDK = {
     BaseModel: _BaseModel.BaseModel,
@@ -1120,67 +1295,41 @@ var XolaBackboneSDK = {
         Users: _Users.UserCollection
     },
 
+    Service: {
+        Account: _Account.Account
+    },
+
     CollectionPool: _CollectionPool.CollectionPool,
 
-    setBaseUrl: function setBaseUrl(baseUrl) {
-        _backbone2.default.$.ajaxSetup({
-            beforeSend: function beforeSend(jqXHR, settings) {
-                settings.url = baseUrl + settings.url;
-                settings.crossDomain = true;
-            }
-        });
-    },
-    setApiKey: function setApiKey(apiKey) {
-        var headers = _backbone2.default.$.ajaxSetup().headers || {};
+    Config: _Config.Config,
 
-        if (apiKey) {
-            headers["X-API-KEY"] = apiKey;
-        } else {
-            delete headers["X-API-KEY"];
-        }
-
-        _backbone2.default.$.ajaxSetup(_backbone2.default.$.ajaxSettings, {
-            headers: headers
-        });
-    },
-    setApiVersion: function setApiVersion(apiVersion) {
-        var headers = _backbone2.default.$.ajaxSetup().headers || {};
-
-        if (apiVersion) {
-            headers["X-API-VERSION"] = apiVersion;
-        } else {
-            delete headers["X-API-VERSION"];
-        }
-
-        _backbone2.default.$.ajaxSetup(_backbone2.default.$.ajaxSettings, {
-            headers: headers
-        });
-    },
-    login: function login(username, password) {
+    login: function login(username, password, options) {
         var _this = this;
 
-        var headers = _backbone2.default.$.ajaxSetup().headers || {};
+        options = options || {};
+        var _beforeSend = options.beforeSend;
+        var _success = options.success;
 
-        headers["Authorization"] = 'Basic ' + btoa(username + ':' + password);
-        delete headers["X-API-KEY"];
+        _Account.Account.currentUser = new _User.User({ id: "me" }); //CollectionPool.getCollection(UserCollection).get("me", true);
+        _Account.Account.currentUser.fetch({
+            beforeSend: function beforeSend(jqXHR, settings) {
+                settings.crossDomain = true;
 
-        _backbone2.default.$.ajaxSetup(_backbone2.default.$.ajaxSettings, {
-            headers: headers
-        });
+                jqXHR.setRequestHeader("Authorization", "Basic " + btoa(username + ':' + password));
 
-        var currentUser = _CollectionPool.CollectionPool.getCollection(_Users.UserCollection).get("me", true);
-        currentUser.fetch({
-            success: function success(me) {
-                currentUser = me;
-                _this.setApiKey(me.get("apiKey"));
+                if (_beforeSend) return _beforeSend.call(_this, jqXHR, settings);
+            },
+            success: function success(data, textStatus, jqXHR) {
+                if (_success) _success.call(_this, data, textStatus, jqXHR);
 
-                _this.trigger("user.login", me);
+                _this.trigger("user.login", data);
             }
         });
+
+        return _Account.Account.currentUser;
     },
     logout: function logout() {
-        this.setApiKey();
-        currentUser = null;
+        _Account.Account.currentUser = null;
 
         this.trigger("user.logout");
     }
@@ -1189,35 +1338,13 @@ var XolaBackboneSDK = {
 var sdkInitialized;
 if (!sdkInitialized) {
     _underscore2.default.extend(XolaBackboneSDK, _backbone2.default.Events);
-
-    XolaBackboneSDK.setBaseUrl("https://xola.com/api");
-    XolaBackboneSDK.setApiVersion("2017-09-13");
-
     sdkInitialized = true;
 }
 
 module.exports = XolaBackboneSDK;
 
 /***/ }),
-/* 24 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.Fee = undefined;
-
-var _BaseModel = __webpack_require__(0);
-
-var Fee = exports.Fee = _BaseModel.BaseModel.extend({
-    urlRoot: "/fees"
-});
-
-/***/ }),
-/* 25 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

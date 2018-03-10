@@ -1,6 +1,8 @@
 import _ from "underscore";
 import Backbone from "backbone";
 
+import { Config } from "./Config";
+
 import { BaseModel } from "./BaseModel";
 import { BaseCollection } from "./BaseCollection";
 
@@ -21,8 +23,7 @@ import { OrderDemographicCollection } from "./collections/OrderDemographics";
 import { UserCollection } from "./collections/Users";
 
 import { CollectionPool } from "./CollectionPool";
-
-var currentUser = null;
+import { Account } from "./services/Account";
 
 const XolaBackboneSDK = {
     BaseModel: BaseModel,
@@ -48,71 +49,40 @@ const XolaBackboneSDK = {
         Users: UserCollection
     },
 
+    Service: {
+        Account: Account
+    },
+
     CollectionPool: CollectionPool,
 
-    setBaseUrl(baseUrl) {
-        Backbone.$.ajaxSetup({
-            beforeSend: function (jqXHR, settings) {
-                settings.url = baseUrl + settings.url;
+    Config: Config,
+
+    login(username, password, options) {
+        options = options || {};
+        var beforeSend = options.beforeSend;
+        var success = options.success;
+
+        Account.currentUser = new User({id: "me"}); //CollectionPool.getCollection(UserCollection).get("me", true);
+        Account.currentUser.fetch({
+            beforeSend: (jqXHR, settings) => {
                 settings.crossDomain = true;
+
+                jqXHR.setRequestHeader("Authorization", "Basic " + btoa(username + ':' + password));
+
+                if (beforeSend) return beforeSend.call(this, jqXHR, settings);
+            },
+            success: (data, textStatus, jqXHR) => {
+                if (success) success.call(this, data, textStatus, jqXHR);
+
+                this.trigger("user.login", data);
             }
         });
-    },
 
-    setApiKey(apiKey) {
-        var headers = Backbone.$.ajaxSetup().headers || {};
-
-        if (apiKey) {
-            headers["X-API-KEY"] = apiKey;
-        }
-        else {
-            delete headers["X-API-KEY"];
-        }
-
-        Backbone.$.ajaxSetup(Backbone.$.ajaxSettings, {
-            headers
-        });
-    },
-
-    setApiVersion(apiVersion) {
-        var headers = Backbone.$.ajaxSetup().headers || {};
-
-        if (apiVersion) {
-            headers["X-API-VERSION"] = apiVersion;
-        }
-        else {
-            delete headers["X-API-VERSION"];
-        }
-
-        Backbone.$.ajaxSetup(Backbone.$.ajaxSettings, {
-            headers
-        });
-    },
-
-    login(username, password) {
-        var headers = Backbone.$.ajaxSetup().headers || {};
-
-        headers["Authorization"] = 'Basic ' + btoa(username + ':' + password);
-        delete headers["X-API-KEY"];
-
-        Backbone.$.ajaxSetup(Backbone.$.ajaxSettings, {
-            headers
-        });
-
-        var currentUser = CollectionPool.getCollection(UserCollection).get("me", true);
-        currentUser.fetch({
-            success: (me) => {
-                currentUser = me;
-                this.setApiKey(me.get("apiKey"));
-
-                this.trigger("user.login", me);
-            }
-        });
+        return Account.currentUser;
     },
 
     logout() {
-        this.setApiKey();
-        currentUser = null;
+        Account.currentUser = null;
 
         this.trigger("user.logout");
     }
@@ -121,10 +91,6 @@ const XolaBackboneSDK = {
 var sdkInitialized;
 if (!sdkInitialized) {
     _.extend(XolaBackboneSDK, Backbone.Events);
-
-    XolaBackboneSDK.setBaseUrl("https://xola.com/api");
-    XolaBackboneSDK.setApiVersion("2017-09-13");
-
     sdkInitialized = true;
 }
 

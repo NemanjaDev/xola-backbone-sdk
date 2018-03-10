@@ -15,6 +15,15 @@ const UserRoles = {
 export const User = BaseModel.extend({
     urlRoot: "/users",
 
+    initialize() {
+        BaseModel.prototype.initialize.apply(this, arguments);
+
+        this.delegators = new DelegatorCollection(null, {
+            parent: this
+        });
+        this.delegators.urlRoot = '/delegators';
+    },
+
     hasRole(role) {
         return _.contains(this.get('roles'), role);
     },
@@ -33,6 +42,10 @@ export const User = BaseModel.extend({
 
     isGuideManager() {
         return this.hasRole(UserRoles.ROLE_GUIDE_MANAGER);
+    },
+
+    getDelegators() {
+        return this.delegators;
     }
 }, _.extend({
     PARSERS: {
@@ -40,3 +53,29 @@ export const User = BaseModel.extend({
         meta: ParseHelper.Model(Meta)
     }
 }, UserRoles));
+
+const Delegators = BaseModel.extend({
+    urlRoot: "/delegators",
+});
+
+import { BaseCollection } from "../BaseCollection";
+
+export const DelegatorCollection = BaseCollection.extend({
+    model: User, //Backbone.Model,
+
+    /**
+     * Override so we can parse out paging information.
+     *
+     * @param {Object} resp
+     * @returns {Object} Response model data (without paging information)
+     */
+    parse(resp) {
+        if (resp.hasOwnProperty("sellers")) {
+            return resp.sellers;
+        }
+
+        return resp;
+    },
+}, {
+    POOL_ID: 'Delegators'
+});

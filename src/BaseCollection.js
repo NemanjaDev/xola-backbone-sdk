@@ -1,6 +1,8 @@
 import _ from "underscore";
 import Backbone from "backbone";
 import { BaseModel } from "./BaseModel"
+import { Config } from "./Config";
+import { Account } from "./services/Account";
 
 export const BaseCollection = Backbone.Collection.extend({
     model: BaseModel,
@@ -30,8 +32,9 @@ export const BaseCollection = Backbone.Collection.extend({
      */
     url() {
         const base = this.parent ? this.parent.url() : '';
+        const urlRoot = this.urlRoot ? this.urlRoot : this.model.prototype.urlRoot;
 
-        return base + this.model.prototype.urlRoot;
+        return base + urlRoot;
     },
 
     /**
@@ -48,13 +51,30 @@ export const BaseCollection = Backbone.Collection.extend({
         return resp;
     },
 
+    sync(method, model, options) {
+        var beforeSend = options.beforeSend;
+        options.beforeSend = (jqXHR, settings) => {
+            settings.url = Config.baseUrl + settings.url;
+            settings.crossDomain = true;
+
+            if (Account.currentUser && Account.currentUser.has('apiKey')) {
+                jqXHR.setRequestHeader("X-API-KEY", Account.currentUser.get('apiKey'));
+            }
+
+            jqXHR.setRequestHeader("X-API-VERSION", Config.apiVersion);
+
+            if (beforeSend) return beforeSend.call(this, jqXHR, settings);
+        };
+
+        return Backbone.Model.prototype.sync.call(this, method, model, options);
+    },
+
     get(id, create = false) {
-        var model = Backbone.Collection.prototype.get.apply(this, [id]);
+        var model = Backbone.Collection.prototype.get.call(this, id);
 
         if (!model && create) {
             var attributes = {};
             attributes[this.model.prototype.idAttribute] = id;
-
             model = new this.model(attributes);
             this.add(model);
         }

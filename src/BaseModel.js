@@ -1,5 +1,7 @@
 import _ from "underscore";
 import Backbone from "backbone";
+import { Config } from "./Config";
+import { Account } from "./services/Account";
 
 export const BaseModel = Backbone.Model.extend({
     parent: null,
@@ -50,6 +52,24 @@ export const BaseModel = Backbone.Model.extend({
         }
 
         return parentUrl + url;
+    },
+
+    sync(method, model, options) {
+        var beforeSend = options.beforeSend;
+        options.beforeSend = (jqXHR, settings) => {
+            settings.url = Config.baseUrl + settings.url;
+            settings.crossDomain = true;
+
+            if (Account.currentUser && Account.currentUser.has('apiKey')) {
+                jqXHR.setRequestHeader("X-API-KEY", Account.currentUser.get('apiKey'));
+            }
+
+            jqXHR.setRequestHeader("X-API-VERSION", Config.apiVersion);
+
+            if (beforeSend) return beforeSend.call(this, jqXHR, settings);
+        };
+
+        return Backbone.Model.prototype.sync.call(this, method, model, options);
     },
 
     fetch(options = {}) {
