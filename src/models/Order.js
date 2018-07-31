@@ -1,6 +1,8 @@
 import { BaseCollection } from "../BaseCollection";
 import { BaseModel } from "../BaseModel";
 import { Fee } from "./Fee";
+import { ParseHelper } from "../ParseHelper";
+import { OrderDemographicCollection } from "../collections/OrderDemographics";
 
 export const Order = BaseModel.extend({
     urlRoot: "/orders",
@@ -105,5 +107,9 @@ export const Order = BaseModel.extend({
         }
 
         return json;
+    }
+}, {
+    PARSERS: {
+        demographics: ParseHelper.Collection(OrderDemographicCollection)
     }
 });

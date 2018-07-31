@@ -1,4 +1,6 @@
 import { BaseModel } from "../BaseModel";
+import { ParseHelper } from "../ParseHelper";
+import { DemographicCollection } from "../collections/Demographics";
 
 export const OrderDemographic = BaseModel.extend({
     urlRoot: null,
@@ -36,5 +38,9 @@ export const OrderDemographic = BaseModel.extend({
         else {
             return basePrice;
         }
+    }
+}, {
+    PARSERS: {
+        demographic: ParseHelper.Model(DemographicCollection),
     }
 });

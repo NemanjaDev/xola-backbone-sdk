@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 26);
+/******/ 	return __webpack_require__(__webpack_require__.s = 28);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -261,6 +261,9 @@ var BaseCollection = exports.BaseCollection = _backbone2.default.Collection.exte
     model: _BaseModel.BaseModel,
     parent: null,
     filters: null,
+    paging: {
+        next: null
+    },
 
     /**
      * Override the default `initialize` to support nested models by default.
@@ -303,6 +306,8 @@ var BaseCollection = exports.BaseCollection = _backbone2.default.Collection.exte
      */
     parse: function parse(resp) {
         if (resp.hasOwnProperty("paging") && resp.hasOwnProperty("data")) {
+            this.paging.next = resp.paging.next;
+
             return resp.data;
         }
 
@@ -325,7 +330,7 @@ var BaseCollection = exports.BaseCollection = _backbone2.default.Collection.exte
             if (beforeSend) return beforeSend.call(_this, jqXHR, settings);
         };
 
-        return _backbone2.default.Model.prototype.sync.call(this, method, model, options);
+        return _backbone2.default.Collection.prototype.sync.call(this, method, model, options);
     },
     get: function get(id) {
         var create = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
@@ -602,7 +607,17 @@ var _ParseHelper = __webpack_require__(7);
 var _Experiences = __webpack_require__(4);
 
 var Event = exports.Event = _BaseModel.BaseModel.extend({
-    urlRoot: "/events"
+    urlRoot: "/events",
+
+    /**
+     * Return's true if the event is an all-day event
+     *
+     * @returns {boolean}
+     */
+    isAllDay: function isAllDay() {
+        var time = this.get('start').format('HHmm');
+        return time === '0000';
+    }
 }, {
     PARSERS: {
         start_date: _ParseHelper.ParseHelper.Date,
@@ -628,7 +643,7 @@ var _Availability = __webpack_require__(16);
 
 var _Demographics = __webpack_require__(9);
 
-var _Fees = __webpack_require__(25);
+var _Fees = __webpack_require__(26);
 
 var _ParseHelper = __webpack_require__(7);
 
@@ -646,7 +661,9 @@ var Experience = exports.Experience = _BaseModel.BaseModel.extend({
             parent: this
         });
 
-        this.fees.filters.seller = this.get("seller").id;
+        if (this.has("seller")) {
+            this.fees.filters.seller = this.get("seller").id;
+        }
     },
     getAvailability: function getAvailability() {
         return this.availability;
@@ -841,7 +858,7 @@ var OrderDemographic = exports.OrderDemographic = _BaseModel.BaseModel.extend({
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.DelegatorCollection = exports.User = undefined;
+exports.User = undefined;
 
 var _underscore = __webpack_require__(2);
 
@@ -851,9 +868,9 @@ var _BaseModel = __webpack_require__(0);
 
 var _ParseHelper = __webpack_require__(7);
 
-var _Meta = __webpack_require__(27);
+var _Meta = __webpack_require__(31);
 
-var _BaseCollection = __webpack_require__(1);
+var _Delegators = __webpack_require__(25);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -872,10 +889,9 @@ var User = exports.User = _BaseModel.BaseModel.extend({
     initialize: function initialize() {
         _BaseModel.BaseModel.prototype.initialize.apply(this, arguments);
 
-        this.delegators = new DelegatorCollection(null, {
+        this.delegators = new _Delegators.DelegatorCollection(null, {
             parent: this
         });
-        this.delegators.urlRoot = '/delegators';
     },
     hasRole: function hasRole(role) {
         return _underscore2.default.contains(this.get('roles'), role);
@@ -901,30 +917,6 @@ var User = exports.User = _BaseModel.BaseModel.extend({
         meta: _ParseHelper.ParseHelper.Model(_Meta.Meta)
     }
 }, UserRoles));
-
-var Delegators = _BaseModel.BaseModel.extend({
-    urlRoot: "/delegators"
-});
-
-var DelegatorCollection = exports.DelegatorCollection = _BaseCollection.BaseCollection.extend({
-    model: User, //Backbone.Model,
-
-    /**
-     * Override so we can parse out paging information.
-     *
-     * @param {Object} resp
-     * @returns {Object} Response model data (without paging information)
-     */
-    parse: function parse(resp) {
-        if (resp.hasOwnProperty("sellers")) {
-            return resp.sellers;
-        }
-
-        return resp;
-    }
-}, {
-    POOL_ID: 'Delegators'
-});
 
 /***/ }),
 /* 16 */
@@ -1067,9 +1059,7 @@ var _BaseCollection = __webpack_require__(1);
 var _User = __webpack_require__(15);
 
 var UserCollection = exports.UserCollection = _BaseCollection.BaseCollection.extend({
-    model: function model() {
-        _User.User;
-    }
+    model: _User.User
 }, {
     POOL_ID: 'Users'
 });
@@ -1130,16 +1120,23 @@ var _BaseModel = __webpack_require__(0);
 
 var _Experiences = __webpack_require__(4);
 
+var _Guides = __webpack_require__(27);
+
 var Seller = exports.Seller = _BaseModel.BaseModel.extend({
     urlRoot: "/sellers",
 
     initialize: function initialize() {
         this.experiences = new _Experiences.ExperienceCollection();
-
         this.experiences.filters.seller = this.id;
+
+        this.guides = new _Guides.GuideCollection();
+        this.guides.filters.seller = this.id;
     },
     getExperiences: function getExperiences() {
         return this.experiences;
+    },
+    getGuides: function getGuides() {
+        return this.guides;
     }
 });
 
@@ -1204,6 +1201,34 @@ var AvailabilityCollection = exports.AvailabilityCollection = _BaseCollection.Ba
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.DelegatorCollection = undefined;
+
+var _BaseCollection = __webpack_require__(1);
+
+var _Delegator = __webpack_require__(29);
+
+var DelegatorCollection = exports.DelegatorCollection = _BaseCollection.BaseCollection.extend({
+    model: _Delegator.Delegator,
+
+    parse: function parse(resp) {
+        if (resp.hasOwnProperty("sellers")) {
+            return resp.sellers;
+        }
+
+        return resp;
+    }
+});
+
+/***/ }),
+/* 26 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
 exports.FeeCollection = undefined;
 
 var _BaseCollection = __webpack_require__(1);
@@ -1217,7 +1242,35 @@ var FeeCollection = exports.FeeCollection = _BaseCollection.BaseCollection.exten
 });
 
 /***/ }),
-/* 26 */
+/* 27 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.GuideCollection = undefined;
+
+var _BaseCollection = __webpack_require__(1);
+
+var _Guide = __webpack_require__(30);
+
+var GuideCollection = exports.GuideCollection = _BaseCollection.BaseCollection.extend({
+    model: _Guide.Guide,
+
+    findByUser: function findByUser(user) {
+        return this.find(function (guide) {
+            return guide.get("user").id == user.id;
+        });
+    }
+}, {
+    POOL_ID: 'Guides'
+});
+
+/***/ }),
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1303,28 +1356,34 @@ var XolaBackboneSDK = {
 
     Config: _Config.Config,
 
+    setUser: function setUser(user) {
+        _Account.Account.currentUser = user;
+    },
+    getUser: function getUser() {
+        return _Account.Account.currentUser;
+    },
     login: function login(username, password, options) {
         var _this = this;
 
         options = options || {};
-        var _beforeSend = options.beforeSend;
-        var _success = options.success;
+        var beforeSend = options.beforeSend;
+        var success = options.success;
 
-        _Account.Account.currentUser = new _User.User({ id: "me" }); //CollectionPool.getCollection(UserCollection).get("me", true);
-        _Account.Account.currentUser.fetch({
-            beforeSend: function beforeSend(jqXHR, settings) {
-                settings.crossDomain = true;
+        options.beforeSend = function (jqXHR, settings) {
+            settings.crossDomain = true;
 
-                jqXHR.setRequestHeader("Authorization", "Basic " + btoa(username + ':' + password));
+            jqXHR.setRequestHeader("Authorization", "Basic " + btoa(username + ':' + password));
 
-                if (_beforeSend) return _beforeSend.call(_this, jqXHR, settings);
-            },
-            success: function success(data, textStatus, jqXHR) {
-                if (_success) _success.call(_this, data, textStatus, jqXHR);
+            if (beforeSend) return beforeSend.call(_this, jqXHR, settings);
+        };
+        options.success = function (data, textStatus, jqXHR) {
+            if (success) success.call(_this, data, textStatus, jqXHR);
 
-                _this.trigger("user.login", data);
-            }
-        });
+            _this.trigger("user.login", data);
+        };
+
+        _Account.Account.currentUser = new _User.User({ id: "me" });
+        _Account.Account.currentUser.fetch(options);
 
         return _Account.Account.currentUser;
     },
@@ -1344,7 +1403,50 @@ if (!sdkInitialized) {
 module.exports = XolaBackboneSDK;
 
 /***/ }),
-/* 27 */
+/* 29 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.Delegator = undefined;
+
+var _BaseModel = __webpack_require__(0);
+
+var _Config = __webpack_require__(3);
+
+var Delegator = exports.Delegator = _BaseModel.BaseModel.extend({
+    urlRoot: "/delegators",
+
+    getPictureUrl: function getPictureUrl(size) {
+        size = size || "small";
+        return _Config.Config.baseUrl + this.url("/users") + "/picture?size=" + size;
+    }
+});
+
+/***/ }),
+/* 30 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.Guide = undefined;
+
+var _BaseModel = __webpack_require__(0);
+
+var Guide = exports.Guide = _BaseModel.BaseModel.extend({
+    urlRoot: "/guides"
+});
+
+/***/ }),
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

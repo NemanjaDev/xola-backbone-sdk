@@ -18,7 +18,9 @@ export const Experience = BaseModel.extend({
             parent: this
         });
 
-        this.fees.filters.seller = this.get("seller").id;
+        if (this.has("seller")) {
+            this.fees.filters.seller = this.get("seller").id;
+        }
     },
 
     getAvailability() {

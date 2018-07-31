@@ -57,26 +57,34 @@ const XolaBackboneSDK = {
 
     Config: Config,
 
+    setUser(user) {
+        Account.currentUser = user;
+    },
+
+    getUser() {
+        return Account.currentUser;
+    },
+
     login(username, password, options) {
         options = options || {};
         var beforeSend = options.beforeSend;
         var success = options.success;
 
-        Account.currentUser = new User({id: "me"}); //CollectionPool.getCollection(UserCollection).get("me", true);
-        Account.currentUser.fetch({
-            beforeSend: (jqXHR, settings) => {
-                settings.crossDomain = true;
+        options.beforeSend = (jqXHR, settings) => {
+            settings.crossDomain = true;
 
-                jqXHR.setRequestHeader("Authorization", "Basic " + btoa(username + ':' + password));
+            jqXHR.setRequestHeader("Authorization", "Basic " + btoa(username + ':' + password));
 
-                if (beforeSend) return beforeSend.call(this, jqXHR, settings);
-            },
-            success: (data, textStatus, jqXHR) => {
-                if (success) success.call(this, data, textStatus, jqXHR);
+            if (beforeSend) return beforeSend.call(this, jqXHR, settings);
+        };
+        options.success = (data, textStatus, jqXHR) => {
+            if (success) success.call(this, data, textStatus, jqXHR);
 
-                this.trigger("user.login", data);
-            }
-        });
+            this.trigger("user.login", data);
+        };
+
+        Account.currentUser = new User({id: "me"});
+        Account.currentUser.fetch(options);
 
         return Account.currentUser;
     },

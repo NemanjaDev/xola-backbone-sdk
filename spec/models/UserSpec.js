@@ -41,7 +41,7 @@ describe('User', () => {
 
     describe("isAdmin()", () => {
         it("should return `false` if user does not have 'ROLE_ADMIN' nor 'ROLE_SUPER_ADMIN' role", () => {
-            expect(user.isSeller()).toBe(false);
+            expect(user.isAdmin()).toBe(false);
         });
 
         it("should return `true` if user has either 'ROLE_ADMIN' or 'ROLE_SUPER_ADMIN' role", () => {

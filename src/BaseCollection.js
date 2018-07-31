@@ -8,6 +8,9 @@ export const BaseCollection = Backbone.Collection.extend({
     model: BaseModel,
     parent: null,
     filters: null,
+    paging: {
+        next: null
+    },
 
     /**
      * Override the default `initialize` to support nested models by default.
@@ -45,6 +48,8 @@ export const BaseCollection = Backbone.Collection.extend({
      */
     parse(resp) {
         if (resp.hasOwnProperty("paging") && resp.hasOwnProperty("data")) {
+            this.paging.next = resp.paging.next;
+
             return resp.data;
         }
 
@@ -66,7 +71,7 @@ export const BaseCollection = Backbone.Collection.extend({
             if (beforeSend) return beforeSend.call(this, jqXHR, settings);
         };
 
-        return Backbone.Model.prototype.sync.call(this, method, model, options);
+        return Backbone.Collection.prototype.sync.call(this, method, model, options);
     },
 
     get(id, create = false) {

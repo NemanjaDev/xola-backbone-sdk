@@ -23,7 +23,7 @@
         "dist",
         "README.md"
     ],
-    "author": "Igor Stojadinovic <mightytroll@gmail.com> (http://www.articodestudio.com/)",
+    "author": "Igor Stojadinovic <mightytroll@gmail.com> (http://www.articodestudio.com)",
     "license": "MIT",
     "bugs": {
         "url": "https://github.com/mightytroll/xola-backbone-sdk/issues"
