@@ -19,9 +19,7 @@ export const User = BaseModel.extend({
     initialize() {
         BaseModel.prototype.initialize.apply(this, arguments);
 
-        this.delegators = new DelegatorCollection(null, {
-            parent: this
-        });
+        this.delegators = new DelegatorCollection();
     },
 
     hasRole(role) {
