@@ -62,6 +62,10 @@ export const BaseCollection = Backbone.Collection.extend({
             settings.url = Config.baseUrl + settings.url;
             settings.crossDomain = true;
 
+            if (Config.apiKey) {
+                jqXHR.setRequestHeader("X-API-KEY", Config.apiKey);
+            }
+
             if (Account.currentUser && Account.currentUser.has('apiKey')) {
                 jqXHR.setRequestHeader("X-API-KEY", Account.currentUser.get('apiKey'));
             }

@@ -1,13 +1,13 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("underscore"), require("backbone"));
+		module.exports = factory(require("underscore"), require("backbone"), require("jquery"));
 	else if(typeof define === 'function' && define.amd)
-		define(["underscore", "backbone"], factory);
+		define(["underscore", "backbone", "jquery"], factory);
 	else if(typeof exports === 'object')
-		exports["XolaBackboneSDK"] = factory(require("underscore"), require("backbone"));
+		exports["XolaBackboneSDK"] = factory(require("underscore"), require("backbone"), require("jquery"));
 	else
-		root["XolaBackboneSDK"] = factory(root["_"], root["Backbone"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_6__) {
+		root["XolaBackboneSDK"] = factory(root["_"], root["Backbone"], root["$"]);
+})(this, function(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_8__, __WEBPACK_EXTERNAL_MODULE_33__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -92,13 +92,13 @@ var _underscore = __webpack_require__(2);
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
-var _backbone = __webpack_require__(6);
+var _backbone = __webpack_require__(8);
 
 var _backbone2 = _interopRequireDefault(_backbone);
 
-var _Config = __webpack_require__(3);
+var _Config = __webpack_require__(4);
 
-var _Account = __webpack_require__(5);
+var _Account = __webpack_require__(7);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -160,6 +160,10 @@ var BaseModel = exports.BaseModel = _backbone2.default.Model.extend({
         options.beforeSend = function (jqXHR, settings) {
             settings.url = _Config.Config.baseUrl + settings.url;
             settings.crossDomain = true;
+
+            if (_Config.Config.apiKey) {
+                jqXHR.setRequestHeader("X-API-KEY", _Config.Config.apiKey);
+            }
 
             if (_Account.Account.currentUser && _Account.Account.currentUser.has('apiKey')) {
                 jqXHR.setRequestHeader("X-API-KEY", _Account.Account.currentUser.get('apiKey'));
@@ -245,15 +249,15 @@ var _underscore = __webpack_require__(2);
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
-var _backbone = __webpack_require__(6);
+var _backbone = __webpack_require__(8);
 
 var _backbone2 = _interopRequireDefault(_backbone);
 
 var _BaseModel = __webpack_require__(0);
 
-var _Config = __webpack_require__(3);
+var _Config = __webpack_require__(4);
 
-var _Account = __webpack_require__(5);
+var _Account = __webpack_require__(7);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -321,6 +325,10 @@ var BaseCollection = exports.BaseCollection = _backbone2.default.Collection.exte
             settings.url = _Config.Config.baseUrl + settings.url;
             settings.crossDomain = true;
 
+            if (_Config.Config.apiKey) {
+                jqXHR.setRequestHeader("X-API-KEY", _Config.Config.apiKey);
+            }
+
             if (_Account.Account.currentUser && _Account.Account.currentUser.has('apiKey')) {
                 jqXHR.setRequestHeader("X-API-KEY", _Account.Account.currentUser.get('apiKey'));
             }
@@ -380,92 +388,13 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-var Config = exports.Config = {
-    apiVersion: "2017-09-13",
-    baseUrl: "https://xola.com/api"
-};
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.ExperienceCollection = undefined;
-
-var _BaseCollection = __webpack_require__(1);
-
-var _Availabilities = __webpack_require__(24);
-
-var _Experience = __webpack_require__(12);
-
-var ExperienceCollection = exports.ExperienceCollection = _BaseCollection.BaseCollection.extend({
-    model: _Experience.Experience,
-
-    initialize: function initialize() {
-        var _this = this;
-
-        _BaseCollection.BaseCollection.prototype.initialize.apply(this, arguments);
-
-        this.availability = new _Availabilities.AvailabilityCollection(null, { experiences: this });
-
-        this.listenTo(this, "update", function () {
-            _this.availability.filters.experience = _this.pluck("id").join(",");
-        });
-    },
-
-
-    /**
-     * @returns { AvailabilityCollection }
-     */
-    getAvailability: function getAvailability() {
-        return this.availability;
-    }
-}, {
-    POOL_ID: 'Experiences'
-});
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-var Account = exports.Account = {
-    currentUser: null
-};
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_6__;
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
 exports.ParseHelper = undefined;
 
 var _BaseModel = __webpack_require__(0);
 
 var _BaseCollection = __webpack_require__(1);
 
-var _CollectionPool = __webpack_require__(8);
+var _CollectionPool = __webpack_require__(9);
 
 var ParseHelper = exports.ParseHelper = {
     Date: function (_Date) {
@@ -519,7 +448,109 @@ var ParseHelper = exports.ParseHelper = {
 };
 
 /***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+var Config = exports.Config = {
+    apiVersion: "2017-09-13",
+    baseUrl: "https://xola.com/api",
+    apiKey: "595e291aa48cf267048b4568"
+};
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.DemographicCollection = undefined;
+
+var _BaseCollection = __webpack_require__(1);
+
+var _Demographic = __webpack_require__(12);
+
+var DemographicCollection = exports.DemographicCollection = _BaseCollection.BaseCollection.extend({
+    model: _Demographic.Demographic
+}, {
+    POOL_ID: 'Demographics'
+});
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.ExperienceCollection = undefined;
+
+var _BaseCollection = __webpack_require__(1);
+
+var _Availabilities = __webpack_require__(24);
+
+var _Experience = __webpack_require__(14);
+
+var ExperienceCollection = exports.ExperienceCollection = _BaseCollection.BaseCollection.extend({
+    model: _Experience.Experience,
+
+    initialize: function initialize() {
+        var _this = this;
+
+        _BaseCollection.BaseCollection.prototype.initialize.apply(this, arguments);
+
+        this.availability = new _Availabilities.AvailabilityCollection(null, { experiences: this });
+
+        this.listenTo(this, "update", function () {
+            _this.availability.filters.experience = _this.pluck("id").join(",");
+        });
+    },
+
+
+    /**
+     * @returns { AvailabilityCollection }
+     */
+    getAvailability: function getAvailability() {
+        return this.availability;
+    }
+}, {
+    POOL_ID: 'Experiences'
+});
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+var Account = exports.Account = {
+    currentUser: null
+};
+
+/***/ }),
 /* 8 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_8__;
+
+/***/ }),
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -545,7 +576,7 @@ var CollectionPool = exports.CollectionPool = {
 };
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -554,20 +585,42 @@ var CollectionPool = exports.CollectionPool = {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.DemographicCollection = undefined;
+exports.OrderDemographicCollection = undefined;
 
 var _BaseCollection = __webpack_require__(1);
 
-var _Demographic = __webpack_require__(10);
+var _OrderDemographic = __webpack_require__(16);
 
-var DemographicCollection = exports.DemographicCollection = _BaseCollection.BaseCollection.extend({
-    model: _Demographic.Demographic
+var OrderDemographicCollection = exports.OrderDemographicCollection = _BaseCollection.BaseCollection.extend({
+    model: _OrderDemographic.OrderDemographic
 }, {
-    POOL_ID: 'Demographics'
+    POOL_ID: 'OrderDemographics'
 });
 
 /***/ }),
-/* 10 */
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.OrderCollection = undefined;
+
+var _BaseCollection = __webpack_require__(1);
+
+var _Order = __webpack_require__(15);
+
+var OrderCollection = exports.OrderCollection = _BaseCollection.BaseCollection.extend({
+    model: _Order.Order
+}, {
+    POOL_ID: 'Orders'
+});
+
+/***/ }),
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -589,7 +642,7 @@ var Demographic = exports.Demographic = _BaseModel.BaseModel.extend({
 });
 
 /***/ }),
-/* 11 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -602,9 +655,11 @@ exports.Event = undefined;
 
 var _BaseModel = __webpack_require__(0);
 
-var _ParseHelper = __webpack_require__(7);
+var _ParseHelper = __webpack_require__(3);
 
-var _Experiences = __webpack_require__(4);
+var _Experiences = __webpack_require__(6);
+
+var _Orders = __webpack_require__(11);
 
 var Event = exports.Event = _BaseModel.BaseModel.extend({
     urlRoot: "/events",
@@ -621,12 +676,14 @@ var Event = exports.Event = _BaseModel.BaseModel.extend({
 }, {
     PARSERS: {
         start_date: _ParseHelper.ParseHelper.Date,
-        experience: _ParseHelper.ParseHelper.Model(_Experiences.ExperienceCollection)
-    }
+        experience: _ParseHelper.ParseHelper.Model(_Experiences.ExperienceCollection),
+        orders: _ParseHelper.ParseHelper.Collection(_Orders.OrderCollection)
+    },
+    OPEN_UNLIMITED: 99999
 });
 
 /***/ }),
-/* 12 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -639,13 +696,13 @@ exports.Experience = undefined;
 
 var _BaseModel = __webpack_require__(0);
 
-var _Availability = __webpack_require__(16);
+var _Availability = __webpack_require__(19);
 
-var _Demographics = __webpack_require__(9);
+var _Demographics = __webpack_require__(5);
 
 var _Fees = __webpack_require__(26);
 
-var _ParseHelper = __webpack_require__(7);
+var _ParseHelper = __webpack_require__(3);
 
 var Experience = exports.Experience = _BaseModel.BaseModel.extend({
     urlRoot: "/experiences",
@@ -678,7 +735,7 @@ var Experience = exports.Experience = _BaseModel.BaseModel.extend({
 });
 
 /***/ }),
-/* 13 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -693,17 +750,21 @@ var _BaseCollection = __webpack_require__(1);
 
 var _BaseModel = __webpack_require__(0);
 
-var _Fee = __webpack_require__(17);
+var _Fee = __webpack_require__(20);
+
+var _ParseHelper = __webpack_require__(3);
+
+var _OrderDemographics = __webpack_require__(10);
+
+var _Payment = __webpack_require__(17);
 
 var Order = exports.Order = _BaseModel.BaseModel.extend({
     urlRoot: "/orders",
 
     calculateAmount: function calculateAmount() {
-        var _this = this;
-
         var basePrice = this.get("experience").get("price");
         var currency = this.get("experience").get("currency");
-        var baseAmount = basePrice;
+        var baseAmount = 0;
         var totalQuantity = 0;
 
         // Sum up all the demographics
@@ -715,6 +776,9 @@ var Order = exports.Order = _BaseModel.BaseModel.extend({
             totalQuantity += quantity;
             baseAmount += amount;
         });
+        if (this.get('experience').get('priceType') === _Fee.Fee.SCOPE_OUTING) {
+            baseAmount = basePrice;
+        }
 
         var totalAmount = baseAmount;
 
@@ -730,7 +794,7 @@ var Order = exports.Order = _BaseModel.BaseModel.extend({
                 case _Fee.Fee.SCOPE_OUTING:
                     switch (fee.get("amountType")) {
                         case _Fee.Fee.AMOUNT_TYPE_ABSOLUTE:
-                            feeAmount = _this.get('amount');
+                            feeAmount = fee.get('amount');
                             break;
 
                         case _Fee.Fee.AMOUNT_TYPE_PERCENT:
@@ -746,7 +810,7 @@ var Order = exports.Order = _BaseModel.BaseModel.extend({
             adjustments.add(new _BaseModel.BaseModel({
                 type: "fee",
                 amount: feeAmount,
-                caption: "Fee",
+                caption: fee.get('name'),
                 code: fee.id,
                 meta: { fee: fee }
             }));
@@ -796,11 +860,37 @@ var Order = exports.Order = _BaseModel.BaseModel.extend({
         }
 
         return json;
+    },
+    getMaxQuantity: function getMaxQuantity() {
+        var group = this.get('experience').get('group');
+        if (group) {
+            var max = group.outingMax || Event.OPEN_UNLIMITED;
+            if (this.availability && this.availability.isAvailable()) {
+                // Model has availability flag set. i.e. Availability for the specified arrival date and time
+                var totalOpenCount = this.availability.getTotalOpenCount();
+                if (totalOpenCount < max) {
+                    max = totalOpenCount;
+                }
+                if (this.availability.hasTimeSlots() && this.has('arrivalTime')) {
+                    var availabilitySlot = this.availability.get('slots').find({ time: this.get('arrivalTime').toString() });
+                    if (availabilitySlot && availabilitySlot.get('count') != Event.OPEN_UNLIMITED) {
+                        max = availabilitySlot.get('count');
+                    }
+                }
+            }
+
+            return max;
+        }
+    }
+}, {
+    PARSERS: {
+        demographics: _ParseHelper.ParseHelper.Collection(_OrderDemographics.OrderDemographicCollection),
+        payment: _ParseHelper.ParseHelper.Model(_Payment.Payment)
     }
 });
 
 /***/ }),
-/* 14 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -812,6 +902,10 @@ Object.defineProperty(exports, "__esModule", {
 exports.OrderDemographic = undefined;
 
 var _BaseModel = __webpack_require__(0);
+
+var _ParseHelper = __webpack_require__(3);
+
+var _Demographics = __webpack_require__(5);
 
 var OrderDemographic = exports.OrderDemographic = _BaseModel.BaseModel.extend({
     urlRoot: null,
@@ -846,10 +940,60 @@ var OrderDemographic = exports.OrderDemographic = _BaseModel.BaseModel.extend({
             return basePrice;
         }
     }
+}, {
+    PARSERS: {
+        demographic: _ParseHelper.ParseHelper.Model(_Demographics.DemographicCollection)
+    }
 });
 
 /***/ }),
-/* 15 */
+/* 17 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.Payment = undefined;
+
+var _underscore = __webpack_require__(2);
+
+var _underscore2 = _interopRequireDefault(_underscore);
+
+var _Card = __webpack_require__(29);
+
+var _BaseModel = __webpack_require__(0);
+
+var _ParseHelper = __webpack_require__(3);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var PaymentMethods = {
+    METHOD_CREDIT_CARD: "cc"
+};
+
+var Payment = exports.Payment = _BaseModel.BaseModel.extend({
+    toJSON: function toJSON() {
+        var json = _BaseModel.BaseModel.prototype.toJSON.apply(this, arguments);
+
+        switch (this.get("method")) {
+            case PaymentMethods.METHOD_CREDIT_CARD:
+                json.card = this.get("card").toJSON();
+                break;
+        }
+
+        return json;
+    }
+}, _underscore2.default.extend({
+    PARSERS: {
+        card: _ParseHelper.ParseHelper.Model(_Card.Card)
+    }
+}, PaymentMethods));
+
+/***/ }),
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -866,9 +1010,9 @@ var _underscore2 = _interopRequireDefault(_underscore);
 
 var _BaseModel = __webpack_require__(0);
 
-var _ParseHelper = __webpack_require__(7);
+var _ParseHelper = __webpack_require__(3);
 
-var _Meta = __webpack_require__(31);
+var _Meta = __webpack_require__(32);
 
 var _Delegators = __webpack_require__(25);
 
@@ -889,9 +1033,7 @@ var User = exports.User = _BaseModel.BaseModel.extend({
     initialize: function initialize() {
         _BaseModel.BaseModel.prototype.initialize.apply(this, arguments);
 
-        this.delegators = new _Delegators.DelegatorCollection(null, {
-            parent: this
-        });
+        this.delegators = new _Delegators.DelegatorCollection();
     },
     hasRole: function hasRole(role) {
         return _underscore2.default.contains(this.get('roles'), role);
@@ -919,7 +1061,7 @@ var User = exports.User = _BaseModel.BaseModel.extend({
 }, UserRoles));
 
 /***/ }),
-/* 16 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -949,11 +1091,46 @@ var Availability = exports.Availability = _BaseModel.BaseModel.extend({
     },
     getSlotsByDateTime: function getSlotsByDateTime(date, time) {
         return this.getSlotsByDate(date)[time];
+    },
+
+
+    isAvailable: function isAvailable() {
+        return !this.isBlackedOut() && this.getTotalOpenCount() > 0;
+    },
+
+    isBlackedOut: function isBlackedOut() {
+        var isBlackedOut = false;
+        if (this.hasTimeSlots()) {
+            var slots = this.get('slots');
+            if (slots.length === 1) {
+                var slot = slots.at(0);
+                if (slot.get('count') === 0 && slot.get('time') === 0) {
+                    isBlackedOut = true;
+                }
+            }
+        }
+        return isBlackedOut;
+    },
+
+    hasTimeSlots: function hasTimeSlots() {
+        if (this.has('slots') && this.get('slots').size()) {
+            var slots = this.get('slots');
+            return !(slots.size() === 1 && slots.at(0).get('time') === 0);
+        }
+        return false;
+    },
+
+    getTotalOpenCount: function getTotalOpenCount() {
+        var total = 0;
+        this.get('slots').each(function (slot) {
+            total += slot.get('count');
+        });
+        return total;
     }
 });
 
 /***/ }),
-/* 17 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -977,7 +1154,7 @@ var Fee = exports.Fee = _BaseModel.BaseModel.extend({
 });
 
 /***/ }),
-/* 18 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -990,78 +1167,12 @@ exports.EventCollection = undefined;
 
 var _BaseCollection = __webpack_require__(1);
 
-var _Event = __webpack_require__(11);
+var _Event = __webpack_require__(13);
 
 var EventCollection = exports.EventCollection = _BaseCollection.BaseCollection.extend({
     model: _Event.Event
 }, {
     POOL_ID: 'Events'
-});
-
-/***/ }),
-/* 19 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.OrderDemographicCollection = undefined;
-
-var _BaseCollection = __webpack_require__(1);
-
-var _OrderDemographic = __webpack_require__(14);
-
-var OrderDemographicCollection = exports.OrderDemographicCollection = _BaseCollection.BaseCollection.extend({
-    model: _OrderDemographic.OrderDemographic
-}, {
-    POOL_ID: 'OrderDemographics'
-});
-
-/***/ }),
-/* 20 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.OrderCollection = undefined;
-
-var _BaseCollection = __webpack_require__(1);
-
-var _Order = __webpack_require__(13);
-
-var OrderCollection = exports.OrderCollection = _BaseCollection.BaseCollection.extend({
-    model: _Order.Order
-}, {
-    POOL_ID: 'Orders'
-});
-
-/***/ }),
-/* 21 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.UserCollection = undefined;
-
-var _BaseCollection = __webpack_require__(1);
-
-var _User = __webpack_require__(15);
-
-var UserCollection = exports.UserCollection = _BaseCollection.BaseCollection.extend({
-    model: _User.User
-}, {
-    POOL_ID: 'Users'
 });
 
 /***/ }),
@@ -1074,35 +1185,17 @@ var UserCollection = exports.UserCollection = _BaseCollection.BaseCollection.ext
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.Payment = undefined;
+exports.UserCollection = undefined;
 
-var _underscore = __webpack_require__(2);
+var _BaseCollection = __webpack_require__(1);
 
-var _underscore2 = _interopRequireDefault(_underscore);
+var _User = __webpack_require__(18);
 
-var _BaseModel = __webpack_require__(0);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var PaymentMethods = {
-    METHOD_CREDIT_CARD: "cc"
-};
-
-var Payment = exports.Payment = _BaseModel.BaseModel.extend({
-    toJSON: function toJSON() {
-        var json = _BaseModel.BaseModel.prototype.toJSON.apply(this, arguments);
-
-        switch (this.get("method")) {
-            case PaymentMethods.METHOD_CREDIT_CARD:
-                json.card = this.get("card").toJSON();
-                break;
-        }
-
-        return json;
-    }
-}, _underscore2.default.extend({
-    PARSERS: {}
-}, PaymentMethods));
+var UserCollection = exports.UserCollection = _BaseCollection.BaseCollection.extend({
+    model: _User.User
+}, {
+    POOL_ID: 'Users'
+});
 
 /***/ }),
 /* 23 */
@@ -1118,7 +1211,7 @@ exports.Seller = undefined;
 
 var _BaseModel = __webpack_require__(0);
 
-var _Experiences = __webpack_require__(4);
+var _Experiences = __webpack_require__(6);
 
 var _Guides = __webpack_require__(27);
 
@@ -1129,7 +1222,9 @@ var Seller = exports.Seller = _BaseModel.BaseModel.extend({
         this.experiences = new _Experiences.ExperienceCollection();
         this.experiences.filters.seller = this.id;
 
-        this.guides = new _Guides.GuideCollection();
+        this.guides = new _Guides.GuideCollection(null, {
+            parent: this
+        });
         this.guides.filters.seller = this.id;
     },
     getExperiences: function getExperiences() {
@@ -1158,7 +1253,7 @@ var _underscore2 = _interopRequireDefault(_underscore);
 
 var _BaseCollection = __webpack_require__(1);
 
-var _Availability = __webpack_require__(16);
+var _Availability = __webpack_require__(19);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1205,18 +1300,11 @@ exports.DelegatorCollection = undefined;
 
 var _BaseCollection = __webpack_require__(1);
 
-var _Delegator = __webpack_require__(29);
+var _Delegator = __webpack_require__(30);
 
 var DelegatorCollection = exports.DelegatorCollection = _BaseCollection.BaseCollection.extend({
-    model: _Delegator.Delegator,
+    model: _Delegator.Delegator
 
-    parse: function parse(resp) {
-        if (resp.hasOwnProperty("sellers")) {
-            return resp.sellers;
-        }
-
-        return resp;
-    }
 });
 
 /***/ }),
@@ -1233,7 +1321,7 @@ exports.FeeCollection = undefined;
 
 var _BaseCollection = __webpack_require__(1);
 
-var _Fee = __webpack_require__(17);
+var _Fee = __webpack_require__(20);
 
 var FeeCollection = exports.FeeCollection = _BaseCollection.BaseCollection.extend({
     model: _Fee.Fee
@@ -1255,7 +1343,7 @@ exports.GuideCollection = undefined;
 
 var _BaseCollection = __webpack_require__(1);
 
-var _Guide = __webpack_require__(30);
+var _Guide = __webpack_require__(31);
 
 var GuideCollection = exports.GuideCollection = _BaseCollection.BaseCollection.extend({
     model: _Guide.Guide,
@@ -1280,47 +1368,47 @@ var _underscore = __webpack_require__(2);
 
 var _underscore2 = _interopRequireDefault(_underscore);
 
-var _backbone = __webpack_require__(6);
+var _backbone = __webpack_require__(8);
 
 var _backbone2 = _interopRequireDefault(_backbone);
 
-var _Config = __webpack_require__(3);
+var _Config = __webpack_require__(4);
 
 var _BaseModel = __webpack_require__(0);
 
 var _BaseCollection = __webpack_require__(1);
 
-var _Demographic = __webpack_require__(10);
+var _Demographic = __webpack_require__(12);
 
-var _Experience = __webpack_require__(12);
+var _Experience = __webpack_require__(14);
 
-var _Event = __webpack_require__(11);
+var _Event = __webpack_require__(13);
 
-var _Order = __webpack_require__(13);
+var _Order = __webpack_require__(15);
 
-var _OrderDemographic = __webpack_require__(14);
+var _OrderDemographic = __webpack_require__(16);
 
-var _Payment = __webpack_require__(22);
+var _Payment = __webpack_require__(17);
 
 var _Seller = __webpack_require__(23);
 
-var _User = __webpack_require__(15);
+var _User = __webpack_require__(18);
 
-var _Demographics = __webpack_require__(9);
+var _Demographics = __webpack_require__(5);
 
-var _Experiences = __webpack_require__(4);
+var _Experiences = __webpack_require__(6);
 
-var _Events = __webpack_require__(18);
+var _Events = __webpack_require__(21);
 
-var _Orders = __webpack_require__(20);
+var _Orders = __webpack_require__(11);
 
-var _OrderDemographics = __webpack_require__(19);
+var _OrderDemographics = __webpack_require__(10);
 
-var _Users = __webpack_require__(21);
+var _Users = __webpack_require__(22);
 
-var _CollectionPool = __webpack_require__(8);
+var _CollectionPool = __webpack_require__(9);
 
-var _Account = __webpack_require__(5);
+var _Account = __webpack_require__(7);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1412,11 +1500,105 @@ module.exports = XolaBackboneSDK;
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+exports.Card = undefined;
+
+var _BaseModel = __webpack_require__(0);
+
+var _jquery = __webpack_require__(33);
+
+var _jquery2 = _interopRequireDefault(_jquery);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Card = exports.Card = _BaseModel.BaseModel.extend({
+    defaults: function defaults() {
+        return {
+            number: '',
+            cvv: '',
+            expiryMonth: '',
+            expiryYear: '',
+            billingState: '',
+            billingPostcode: '',
+            billingName: '',
+            billingCity: '',
+            billingAddress: ''
+        };
+    },
+    validation: function validation() {
+        return {
+            billingName: {
+                required: true
+            },
+            number: {
+                required: true,
+                creditCard: true
+            },
+            cvv: {
+                required: !(this.has('swipe') && this.get('swipe')),
+                cvv: true,
+                pattern: 'number',
+                length: this.cardType() === 'American Express' ? 4 : 3
+            },
+            expiryMonth: {
+                required: true,
+                pattern: 'number'
+            },
+            expiryYear: {
+                required: true,
+                pattern: 'number'
+            },
+            billingPostcode: {
+                required: true
+            }
+        };
+    },
+    cardType: function cardType() {
+        var cardNumber = this.get('number');
+        var p = {};
+        p['51'] = 'Mastercard';
+        p['52'] = 'Mastercard';
+        p['53'] = 'Mastercard';
+        p['54'] = 'Mastercard';
+        p['55'] = 'Mastercard';
+        p['34'] = 'American Express';
+        p['37'] = 'American Express';
+        p['4'] = 'VISA';
+        p['6'] = 'Discover Card';
+        p['35'] = 'JCB';
+        p['30'] = 'Diners Club';
+        p['36'] = 'Diners Club';
+        p['38'] = 'Diners Club';
+
+        if (cardNumber) {
+            cardNumber = _jquery2.default.trim(cardNumber.toString());
+            /* eslint-disable */
+            for (var k in p) {
+                if (cardNumber.indexOf(k) === 0) {
+                    return p[k];
+                }
+            }
+            /* eslint-enable */
+        }
+
+        return null;
+    }
+});
+
+/***/ }),
+/* 30 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
 exports.Delegator = undefined;
 
 var _BaseModel = __webpack_require__(0);
 
-var _Config = __webpack_require__(3);
+var _Config = __webpack_require__(4);
 
 var Delegator = exports.Delegator = _BaseModel.BaseModel.extend({
     urlRoot: "/delegators",
@@ -1428,7 +1610,7 @@ var Delegator = exports.Delegator = _BaseModel.BaseModel.extend({
 });
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1446,7 +1628,7 @@ var Guide = exports.Guide = _BaseModel.BaseModel.extend({
 });
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1462,6 +1644,12 @@ var _BaseModel = __webpack_require__(0);
 var Meta = exports.Meta = _BaseModel.BaseModel.extend({
     urlRoot: "/meta"
 });
+
+/***/ }),
+/* 33 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_33__;
 
 /***/ })
 /******/ ]);

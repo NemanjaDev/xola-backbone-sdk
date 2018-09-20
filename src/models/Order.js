@@ -3,6 +3,7 @@ import { BaseModel } from "../BaseModel";
 import { Fee } from "./Fee";
 import { ParseHelper } from "../ParseHelper";
 import { OrderDemographicCollection } from "../collections/OrderDemographics";
+import { Payment } from "./Payment";
 
 export const Order = BaseModel.extend({
     urlRoot: "/orders",
@@ -10,7 +11,7 @@ export const Order = BaseModel.extend({
     calculateAmount() {
         var basePrice = this.get("experience").get("price");
         var currency = this.get("experience").get("currency");
-        var baseAmount = basePrice;
+        var baseAmount = 0;
         var totalQuantity = 0;
 
         // Sum up all the demographics
@@ -22,6 +23,9 @@ export const Order = BaseModel.extend({
             totalQuantity += quantity;
             baseAmount += amount;
         });
+        if (this.get('experience').get('priceType') === Fee.SCOPE_OUTING) {
+            baseAmount = basePrice;
+        }
 
         var totalAmount = baseAmount;
 
@@ -37,7 +41,7 @@ export const Order = BaseModel.extend({
                 case Fee.SCOPE_OUTING:
                     switch (fee.get("amountType")) {
                         case Fee.AMOUNT_TYPE_ABSOLUTE:
-                            feeAmount = this.get('amount');
+                            feeAmount = fee.get('amount');
                             break;
 
                         case Fee.AMOUNT_TYPE_PERCENT:
@@ -54,7 +58,7 @@ export const Order = BaseModel.extend({
                 new BaseModel({
                     type: "fee",
                     amount: feeAmount,
-                    caption: "Fee",
+                    caption: fee.get('name'),
                     code: fee.id,
                     meta: {fee: fee}
                 })
@@ -107,9 +111,33 @@ export const Order = BaseModel.extend({
         }
 
         return json;
+    },
+
+    getMaxQuantity() {
+        var group = this.get('experience').get('group');
+        if (group) {
+            var max = group.outingMax || Event.OPEN_UNLIMITED;
+            if (this.availability && this.availability.isAvailable()) {
+                // Model has availability flag set. i.e. Availability for the specified arrival date and time
+                var totalOpenCount = this.availability.getTotalOpenCount();
+                if (totalOpenCount < max) {
+                    max = totalOpenCount;
+                }
+                if (this.availability.hasTimeSlots() && this.has('arrivalTime')) {
+                    var availabilitySlot = this.availability.get('slots')
+                        .find({time: this.get('arrivalTime').toString()});
+                    if (availabilitySlot && availabilitySlot.get('count') != Event.OPEN_UNLIMITED) {
+                        max = availabilitySlot.get('count');
+                    }
+                }
+            }
+
+            return max;
+        }
     }
 }, {
     PARSERS: {
-        demographics: ParseHelper.Collection(OrderDemographicCollection)
+        demographics: ParseHelper.Collection(OrderDemographicCollection),
+        payment: ParseHelper.Model(Payment)
     }
 });
