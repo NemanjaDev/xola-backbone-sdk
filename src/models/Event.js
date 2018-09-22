@@ -20,5 +20,6 @@ export const Event = BaseModel.extend({
         start_date: ParseHelper.Date,
         experience: ParseHelper.Model(ExperienceCollection),
         orders: ParseHelper.Collection(OrderCollection)
-    }
+    },
+    OPEN_UNLIMITED: 99999
 });
