@@ -1,6 +1,6 @@
 {
     "name": "xola-backbone-sdk",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "SDK for developing Xola apps containing standard Xola models and collections",
     "main": "dist/xola-backbone-sdk.js",
     "module": "src/index.js",
