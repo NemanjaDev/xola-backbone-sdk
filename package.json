@@ -12,7 +12,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/mightytroll/xola-backbone-sdk.git"
+        "url": "git+https://github.com/nemanjaDev/xola-backbone-sdk.git"
     },
     "keywords": [
         "xola",
@@ -26,9 +26,9 @@
     "author": "Igor Stojadinovic <mightytroll@gmail.com> (http://www.articodestudio.com)",
     "license": "MIT",
     "bugs": {
-        "url": "https://github.com/mightytroll/xola-backbone-sdk/issues"
+        "url": "https://github.com/nemanjaDev/xola-backbone-sdk/issues"
     },
-    "homepage": "https://github.com/mightytroll/xola-backbone-sdk#readme",
+    "homepage": "https://github.com/nemanjaDev/xola-backbone-sdk#readme",
     "devDependencies": {
         "babel-core": "6.24.1",
         "babel-loader": "7.0.0",
