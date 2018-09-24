@@ -1,4 +1,5 @@
 import { BaseModel } from "../BaseModel";
+import _ from "underscore";
 
 export const Demographic = BaseModel.extend({
     urlRoot: "/demographics",
