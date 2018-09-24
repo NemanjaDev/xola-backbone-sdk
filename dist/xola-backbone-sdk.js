@@ -633,11 +633,34 @@ exports.Demographic = undefined;
 
 var _BaseModel = __webpack_require__(0);
 
+var _underscore = __webpack_require__(2);
+
+var _underscore2 = _interopRequireDefault(_underscore);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 var Demographic = exports.Demographic = _BaseModel.BaseModel.extend({
     urlRoot: "/demographics",
 
+    demographicsMap: {
+        children: ['child', 'children', 'junior'],
+        adult: ['adults', 'adult', 'guest', 'guests'],
+        senior: ['senior', 'seniors'],
+        veteran: ['military', 'veteran', 'veterans', 'soldier', 'soldiers']
+    },
+
     getLabel: function getLabel() {
         return this.get("label");
+    },
+
+
+    guessDemographicIcon: function guessDemographicIcon(label) {
+        label = label || this.get('label');
+        label = label && label.toLowerCase();
+        var icon = _underscore2.default.findKey(this.demographicsMap, function (list) {
+            return _underscore2.default.contains(list, label);
+        });
+        return icon || 'adult';
     }
 });
 
