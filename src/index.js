@@ -2,10 +2,8 @@ import _ from "underscore";
 import Backbone from "backbone";
 
 import { Config } from "./Config";
-
 import { BaseModel } from "./BaseModel";
 import { BaseCollection } from "./BaseCollection";
-
 import { Demographic } from "./models/Demographic";
 import { Experience } from "./models/Experience";
 import { Event } from "./models/Event";
