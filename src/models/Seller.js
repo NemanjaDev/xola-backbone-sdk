@@ -21,5 +21,10 @@ export const Seller = BaseModel.extend({
 
     getGuides() {
         return this.guides;
-    }
+    },
+
+    isAdditionalBillingInfoRequired: function () {
+        var paymentPreference = this.get('preferences').get('payment');
+        return paymentPreference.get('requireAdditionalBillingInfo');
+    },
 });
