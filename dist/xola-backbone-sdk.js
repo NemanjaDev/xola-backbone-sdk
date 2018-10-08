@@ -458,6 +458,7 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 var Config = exports.Config = {
+    apiVersion: "2017-09-13",
     baseUrl: "https://xola.com/api",
     apiKey: "595e291aa48cf267048b4568"
 };
@@ -1254,6 +1255,12 @@ var Seller = exports.Seller = _BaseModel.BaseModel.extend({
     },
     getGuides: function getGuides() {
         return this.guides;
+    },
+
+
+    isAdditionalBillingInfoRequired: function isAdditionalBillingInfoRequired() {
+        var paymentPreference = this.get('preferences').get('payment');
+        return paymentPreference.get('requireAdditionalBillingInfo');
     }
 });
 
